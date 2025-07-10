@@ -1,0 +1,21 @@
+<div class="login-container">
+  <mat-card>
+    <mat-card-title>Admin Login</mat-card-title>
+    <mat-card-content>
+      <form (ngSubmit)="login()" #loginForm="ngForm">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Username</mat-label>
+          <input matInput name="username" [(ngModel)]="username" required autocomplete="username" />
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput name="password" [(ngModel)]="password" type="password" required autocomplete="current-password" />
+        </mat-form-field>
+        <div *ngIf="error" class="error-text">{{ error }}</div>
+        <button mat-raised-button color="primary" class="full-width" [disabled]="loading">
+          {{ loading ? 'Logging in...' : 'Login' }}
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div> 

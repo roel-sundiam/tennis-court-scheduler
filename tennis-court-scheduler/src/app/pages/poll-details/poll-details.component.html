@@ -1,0 +1,103 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button routerLink="/">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span>Poll Details</span>
+</mat-toolbar>
+
+<div class="container">
+  <div *ngIf="poll" class="poll-content">
+    <div class="poll-header">
+      <h1>{{ poll.title }}</h1>
+      <p>{{ poll.description }}</p>
+    </div>
+
+    <mat-card class="date-options-card">
+      <mat-card-header>
+        <mat-card-title>Vote for a Date</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="player-selector">
+          <h4 class="selector-title">Select Player</h4>
+          <mat-form-field appearance="outline" class="custom-select">
+            <mat-select [(ngModel)]="selectedPlayerId" (selectionChange)="onPlayerSelectionChange()" 
+                        placeholder="Choose a player...">
+              <mat-select-trigger>
+                <span *ngIf="selectedPlayerId">{{ getSelectedPlayerName() }}</span>
+              </mat-select-trigger>
+              <mat-option *ngFor="let player of players" [value]="player.id" class="custom-option">
+                <div class="player-option">
+                  <div class="player-avatar">{{ getPlayerInitials(player.name) }}</div>
+                  <div class="player-info">
+                    <span class="player-name">{{ player.name }}</span>
+                    <span class="player-seed">Seed #{{ player.seed }}</span>
+                  </div>
+                </div>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div *ngFor="let dateOption of poll.options" class="date-option" 
+             [class.already-voted]="initialSelectedDates[dateOption.id]">
+          <mat-checkbox [(ngModel)]="selectedDates[dateOption.id]" [disabled]="submitting || (dateOption.isFull ?? false)">
+            <h3>{{ dateOption.date | date:'fullDate' }}</h3>
+            <p>Maximum Players: {{ getMaxPlayersForCurrentVotes(dateOption.id) }}</p>
+            <p>Current Votes: {{ getVotersForDate(dateOption.id).length }}</p>
+            
+            <!-- Display voters for this date -->
+            <div class="voters-list">
+              <h4>Players:</h4>
+              <div class="voter-chips" *ngIf="getVotersForDate(dateOption.id).length > 0">
+                <span *ngFor="let voter of getVotersForDate(dateOption.id); let i = index" 
+                      class="voter-chip"
+                      [class.excess-player]="i >= getValidPlayersCount(dateOption.id)">
+                  {{ i + 1 }}. {{ voter.playerName }}
+                </span>
+              </div>
+              <div *ngIf="getVotersForDate(dateOption.id).length === 0" class="no-voters">
+                No players yet
+              </div>
+            </div>
+            
+            <p *ngIf="initialSelectedDates[dateOption.id]" class="already-voted-text">
+              <mat-icon>check_circle</mat-icon>
+              You have already voted for this date
+            </p>
+          </mat-checkbox>
+        </div>
+
+        <button mat-raised-button color="primary" (click)="submitVotes()" [disabled]="submitting" class="vote-button">
+          Submit Votes
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="votes-card" *ngIf="hasVotes()">
+      <mat-card-header>
+        <mat-card-title>Current Votes</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngFor="let dateOption of poll.options" class="vote-date-section">
+          <h4>{{ dateOption.date | date:'fullDate' }}</h4>
+          <div *ngIf="dateOption.votes && dateOption.votes.length > 0" class="players-list">
+            <div *ngFor="let vote of dateOption.votes" class="player-item">
+              <span>{{ vote.playerName }}</span>
+            </div>
+          </div>
+          <p *ngIf="!dateOption.votes || dateOption.votes.length === 0" class="no-votes">
+            No votes yet
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+</div>

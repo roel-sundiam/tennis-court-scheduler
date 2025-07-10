@@ -1,0 +1,261 @@
+:host {
+  display: block;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.container {
+  padding: 24px;
+}
+
+.poll-header {
+  margin-bottom: 24px;
+  text-align: center;
+
+  h1 {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 1.2em;
+    color: var(--color-text-secondary);
+  }
+}
+
+.date-options-card,
+.votes-card {
+  background-color: var(--color-bg-card);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+h2 {
+  font-size: 1.8em;
+  font-weight: bold;
+  margin-bottom: 16px;
+  border-bottom: 2px solid var(--color-accent);
+  padding-bottom: 8px;
+}
+
+.date-option {
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  background-color: rgba(255, 255, 255, 0.05);
+  transition: background-color 0.3s, border 0.3s;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  &.already-voted {
+    border: 2px solid #4caf50;
+    background-color: rgba(76, 175, 80, 0.1);
+  }
+
+  h3 {
+    font-size: 1.2em;
+    margin-bottom: 8px;
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .already-voted-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #4caf50;
+    font-weight: 600;
+    margin-top: 8px;
+
+    mat-icon {
+      font-size: 18px;
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  .voters-list {
+    margin-top: 12px;
+    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+
+    h4 {
+      margin: 0 0 8px 0;
+      font-size: 0.9em;
+      color: var(--color-text-secondary);
+    }
+  }
+
+  .voter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .voter-chip {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-text);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    &.current-user {
+      background-color: var(--color-accent);
+      color: white;
+      font-weight: 600;
+    }
+
+    &.excess-player {
+      background-color: rgba(128, 128, 128, 0.3);
+      color: rgba(255, 255, 255, 0.5);
+      border-color: rgba(128, 128, 128, 0.5);
+      text-decoration: line-through;
+    }
+  }
+
+  .no-voters {
+    color: var(--color-text-secondary);
+    font-style: italic;
+    font-size: 0.85em;
+  }
+
+  .excess-players {
+    color: #ff9800;
+    font-style: italic;
+    font-size: 0.85em;
+    margin: 4px 0;
+  }
+}
+
+// Player Selector Redesign
+.player-selector {
+  margin-bottom: 32px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  .selector-title {
+    margin: 0 0 16px 0;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .custom-select {
+    width: 100%;
+    
+    ::ng-deep {
+      .mat-mdc-form-field-outline {
+        color: rgba(255, 255, 255, 0.3);
+      }
+      
+      .mat-mdc-form-field-outline-thick {
+        color: var(--color-accent);
+      }
+      
+      .mat-mdc-select-value {
+        color: var(--color-text);
+      }
+      
+      .mat-mdc-select-placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+      
+      .mat-mdc-select-arrow {
+        color: var(--color-accent);
+      }
+    }
+  }
+}
+
+// Player Option Styling
+::ng-deep .mat-mdc-option.custom-option {
+  .player-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    
+    .player-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffab40 0%, #ff6b6b 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9em;
+      color: white !important;
+      flex-shrink: 0;
+    }
+    
+    .player-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      
+      .player-name {
+        font-weight: 500 !important;
+        font-size: 1em !important;
+        color: #333 !important;
+        line-height: 1.2;
+      }
+      
+      .player-seed {
+        font-size: 0.85em !important;
+        color: #666 !important;
+        opacity: 1 !important;
+        line-height: 1;
+      }
+    }
+  }
+  
+  &:hover .player-option .player-avatar {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+  }
+}
+
+// Additional override for Material select options
+::ng-deep .mat-mdc-option {
+  .player-option .player-name,
+  .player-option .player-seed {
+    color: #333 !important;
+  }
+}
+
+// Dark theme support for dropdown
+::ng-deep .mat-mdc-select-panel {
+  background-color: #fff !important;
+}
+
+.vote-button {
+  margin-top: 16px;
+}
+
+.players-list {
+  margin-top: 16px;
+
+  .player-item {
+    padding: 8px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+}
+
+.no-votes {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}

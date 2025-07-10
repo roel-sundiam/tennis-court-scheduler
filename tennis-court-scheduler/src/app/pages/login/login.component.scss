@@ -1,0 +1,22 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+mat-card {
+  width: 350px;
+  padding: 24px 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.error-text {
+  color: #d32f2f;
+  margin-bottom: 12px;
+  font-size: 0.95em;
+  text-align: center;
+} 

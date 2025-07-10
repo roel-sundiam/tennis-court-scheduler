@@ -1,0 +1,258 @@
+.container {
+  max-width: 900px;
+  margin: 32px auto 0 auto;
+  padding: 0 16px;
+}
+
+.dates-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.date-panel {
+  background: #2d2d2d;
+  border-radius: 14px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.13);
+  padding: 24px 24px 18px 24px;
+  border: none;
+}
+
+.date-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ff7a1a;
+}
+
+.date-header h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.3em;
+  font-weight: 700;
+}
+
+.vote-count {
+  background-color: #ff7a1a;
+  color: #fff;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.voters-section h4,
+.results-section h4 {
+  color: #ff7a1a;
+  font-size: 1.1em;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+}
+
+.voters-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 16px;
+  background-color: #23243a;
+  border-radius: 20px;
+  border: 1px solid #4e54c8;
+  color: #fff;
+  transition: background 0.2s, color 0.2s;
+}
+
+.player-row:hover {
+  background-color: #4e54c8;
+  color: #fff;
+}
+
+.player-row.excess-player {
+  background-color: #444;
+  border-color: #333;
+  color: #bbb;
+}
+
+.seed-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background-color: #4e54c8;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 1em;
+  font-weight: bold;
+}
+
+.excess-player .seed-circle {
+  background-color: #bbb;
+}
+
+.player-name {
+  font-weight: 500;
+}
+
+.no-voters {
+  color: #ff7a1a;
+  font-style: italic;
+  margin: 10px 0;
+}
+
+.results-section {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #444;
+}
+
+.teams-section, .matches-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.team-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  background-color: #23243a;
+  border-radius: 8px;
+  border-left: 4px solid #ff7a1a;
+  color: #fff;
+}
+
+.team-label {
+  font-weight: bold;
+  color: #ff7a1a;
+  min-width: 60px;
+}
+
+.team-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.team-player {
+  padding: 4px 10px;
+  background-color: #4e54c8;
+  border-radius: 4px;
+  font-size: 1em;
+  color: #fff;
+}
+
+.match-row {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 18px 28px;
+  background: #23243a;
+  border-radius: 16px;
+  border-left: 5px solid #4e54c8;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+  margin-bottom: 18px;
+  color: #fff;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.match-row:hover {
+  background: #2d2d3a;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+}
+
+.match-label {
+  font-weight: 700;
+  color: #4e54c8;
+  font-size: 1.3em;
+  min-width: 100px;
+  letter-spacing: 1px;
+}
+
+.match-teams {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex: 1;
+  justify-content: center;
+}
+
+.team-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 18px;
+  background: #191a22;
+  border-radius: 10px;
+  min-width: 180px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+}
+
+.vs-text {
+  font-weight: 900;
+  color: #ff7a1a;
+  font-size: 1.5em;
+  background: #23243a;
+  border-radius: 50%;
+  padding: 0 18px;
+  margin: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ff7a1a;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.team-player {
+  padding: 6px 14px;
+  background: #b2f2d7;
+  color: #23243a;
+  border-radius: 6px;
+  font-size: 1.05em;
+  font-weight: 600;
+  margin: 0 2px;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .date-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .match-teams {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .team-display {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .vs-text {
+    padding: 5px 0;
+  }
+}
+
+mat-card {
+  margin-bottom: 32px;
+  background: #232323 !important;
+  color: #fff !important;
+  border-radius: 18px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+} 

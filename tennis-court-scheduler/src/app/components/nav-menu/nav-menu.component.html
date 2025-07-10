@@ -1,0 +1,56 @@
+<!-- Mobile Navigation Menu -->
+<div class="mobile-nav">
+  <!-- Header -->
+  <div class="mobile-nav-header">
+    <div class="logo-section">
+      <mat-icon class="logo-icon">sports_tennis</mat-icon>
+      <span class="app-title">Tennis Court Scheduler</span>
+    </div>
+    <button mat-icon-button (click)="closeSidenav()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- User Info (if logged in) -->
+  <div class="user-section" *ngIf="user">
+    <div class="user-info">
+      <mat-icon>person</mat-icon>
+      <div class="user-details">
+        <span class="username">{{ user.username }}</span>
+        <span class="role" *ngIf="user.role === 'admin'">Administrator</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Links -->
+  <nav class="nav-links">
+    <ng-container *ngFor="let item of menuItems">
+      <a *ngIf="!item.adminOnly || (item.adminOnly && auth.isAdmin())"
+         mat-button
+         [routerLink]="item.route"
+         routerLinkActive="active-link"
+         (click)="closeSidenav()"
+         class="nav-link">
+        <mat-icon>{{ item.icon }}</mat-icon>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    </ng-container>
+  </nav>
+
+  <!-- Bottom Actions -->
+  <div class="bottom-actions">
+    <ng-container *ngIf="!user">
+      <button mat-raised-button color="primary" (click)="onLogin()" class="login-button">
+        <mat-icon>login</mat-icon>
+        <span>Login</span>
+      </button>
+    </ng-container>
+    
+    <ng-container *ngIf="user">
+      <button mat-stroked-button color="warn" (click)="onLogout()" class="logout-button">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </ng-container>
+  </div>
+</div> 

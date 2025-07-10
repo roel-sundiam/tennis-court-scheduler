@@ -1,0 +1,53 @@
+<div class="players-container">
+  <div class="header">
+    <h1>Players Management</h1>
+    <button *ngIf="auth.isAdmin()" class="btn btn-primary" routerLink="/players/new" [disabled]="saving">
+      <i class="fas fa-plus"></i> Add New Player
+    </button>
+  </div>
+
+  <div class="players-table-container">
+    <div class="drag-instructions">
+      <i class="fas fa-grip-vertical"></i>
+      <span>Drag players to reorder by seed number</span>
+    </div>
+    
+    <div cdkDropList (cdkDropListDropped)="onDrop($event)" class="players-list" [cdkDropListDisabled]="saving">
+      <div *ngFor="let player of players; trackBy: trackByPlayerId" 
+           cdkDrag 
+           class="player-row"
+           [class.cdk-drag-preview]="false"
+           [cdkDragDisabled]="saving">
+        
+        <div class="drag-handle">
+          <i class="fas fa-grip-vertical"></i>
+        </div>
+        
+        <div class="player-info">
+          <div class="seed-cell">
+            <span class="seed-badge">{{ player.seed }}</span>
+          </div>
+          <div class="name-cell">{{ player.name }}</div>
+        </div>
+        
+        <div class="actions-cell" *ngIf="auth.isAdmin()">
+          <button class="btn btn-sm btn-outline-primary" [routerLink]="['/players', player.id, 'edit']" [disabled]="saving">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button class="btn btn-sm btn-outline-danger" (click)="deletePlayer(player.id)" [disabled]="saving">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="players.length === 0" class="no-players">
+      <p>No players found. Add your first player to get started!</p>
+    </div>
+  </div>
+
+  <div class="spinner-overlay" *ngIf="saving">
+    <div class="spinner"></div>
+    <div class="spinner-text">Saving...</div>
+  </div>
+</div> 

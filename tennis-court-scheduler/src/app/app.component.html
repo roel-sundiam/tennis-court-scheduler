@@ -1,0 +1,78 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #sidenav mode="over" class="sidenav">
+    <app-nav-menu [closeSidenav]="closeSidenav.bind(this)"></app-nav-menu>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <!-- Main Toolbar -->
+    <mat-toolbar color="primary" class="main-toolbar">
+      <div class="toolbar-content">
+        <!-- Mobile menu button -->
+        <button mat-icon-button class="menu-button" (click)="sidenav.toggle()" *ngIf="true">
+          <mat-icon>menu</mat-icon>
+        </button>
+
+        <!-- Logo and title -->
+        <div class="logo-section">
+          <mat-icon class="logo-icon">sports_tennis</mat-icon>
+          <span class="app-title">Tennis Court Scheduler</span>
+        </div>
+
+        <!-- Spacer -->
+        <span class="spacer"></span>
+
+        <!-- Desktop Navigation -->
+        <nav class="desktop-nav">
+          <ng-container *ngFor="let item of navItems">
+            <a *ngIf="!item.adminOnly || (item.adminOnly && auth.isAdmin())"
+               mat-button
+               [routerLink]="item.route"
+               routerLinkActive="active-link"
+               class="nav-link">
+              <mat-icon>{{item.icon}}</mat-icon>
+              <span class="nav-label">{{item.label}}</span>
+            </a>
+          </ng-container>
+        </nav>
+
+        <!-- User Actions -->
+        <div class="user-actions">
+          <ng-container *ngIf="!auth.isLoggedIn()">
+            <button mat-button routerLink="/login" class="login-btn">
+              <mat-icon>login</mat-icon>
+              <span>Login</span>
+            </button>
+          </ng-container>
+          
+          <ng-container *ngIf="auth.isLoggedIn()">
+            <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu-btn">
+              <mat-icon>person</mat-icon>
+              <span>{{ auth.getUser()?.username }}</span>
+              <mat-icon>arrow_drop_down</mat-icon>
+            </button>
+            <mat-menu #userMenu="matMenu">
+              <button mat-menu-item disabled>
+                <mat-icon>person_outline</mat-icon>
+                <span>{{ auth.getUser()?.username }}</span>
+              </button>
+              <button mat-menu-item *ngIf="auth.isAdmin()">
+                <mat-icon>admin_panel_settings</mat-icon>
+                <span>Admin</span>
+              </button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="auth.logout()">
+                <mat-icon>logout</mat-icon>
+                <span>Logout</span>
+              </button>
+            </mat-menu>
+          </ng-container>
+        </div>
+      </div>
+    </mat-toolbar>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

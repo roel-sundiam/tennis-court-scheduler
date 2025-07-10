@@ -1,0 +1,324 @@
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+:root {
+  --color-bg: #232323;
+  --color-bg-card: #2d2d2d;
+  --color-bg-toolbar: #333;
+  --color-bg-toolbar-dark: #232323;
+  --color-accent: #ff7a1a;
+  --color-text: #f5f5f5;
+  --color-text-secondary: #bdbdbd;
+  --color-divider: #444;
+  --color-shadow: rgba(0,0,0,0.4);
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', Arial, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+body {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.mat-toolbar, .nav-toolbar {
+  background: var(--color-bg-toolbar) !important;
+  color: var(--color-text) !important;
+  box-shadow: none;
+  border-bottom: 4px solid var(--color-accent);
+}
+
+.mat-card, mat-card {
+  background: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 2px 12px var(--color-shadow);
+}
+
+.mat-form-field-appearance-fill .mat-form-field-flex {
+  background: var(--color-bg-toolbar-dark);
+  color: var(--color-text);
+}
+
+.mat-input-element, .mat-form-field-label {
+  color: var(--color-text-secondary) !important;
+}
+
+/*
+.mat-raised-button, .mat-flat-button, .btn-primary {
+  background: var(--color-accent) !important;
+  color: #fff !important;
+  border-radius: 24px !important;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.mat-button, .mat-stroked-button, .btn {
+  color: var(--color-accent) !important;
+  border-radius: 24px !important;
+  font-weight: 500;
+}
+
+.mat-icon {
+  color: var(--color-accent) !important;
+}
+*/
+
+h1, h2, h3, h4, h5 {
+  color: #fff;
+  font-family: 'Roboto', Arial, sans-serif;
+  font-weight: 700;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  font-size: 2.2em;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+h2 {
+  font-size: 1.5em;
+  margin-bottom: 0.3em;
+}
+
+label, .mat-label {
+  color: var(--color-text-secondary) !important;
+  font-weight: 500;
+}
+
+.mat-chip {
+  background: var(--color-bg-toolbar-dark) !important;
+  color: var(--color-text) !important;
+  font-weight: 500;
+}
+
+.mat-menu-content, .mat-menu-panel {
+  background: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+/*
+.mat-icon {
+  color: var(--color-accent) !important;
+}
+*/
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: var(--color-bg-toolbar-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-divider);
+  border-radius: 8px;
+}
+
+// Accent underline for headings
+.heading-accent {
+  display: inline-block;
+  border-bottom: 4px solid var(--color-accent);
+  padding-bottom: 2px;
+  margin-bottom: 8px;
+}
+
+// Card shadow
+.card-shadow {
+  box-shadow: 0 2px 12px var(--color-shadow);
+}
+
+// Utility
+.text-secondary {
+  color: var(--color-text-secondary) !important;
+}
+.bg-accent {
+  background: var(--color-accent) !important;
+  color: #fff !important;
+}
+
+/* Responsive Breakpoints */
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
+
+/* Responsive Container Classes */
+.container {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+  
+  @media (min-width: $breakpoint-sm) {
+    max-width: 540px;
+  }
+  
+  @media (min-width: $breakpoint-md) {
+    max-width: 720px;
+  }
+  
+  @media (min-width: $breakpoint-lg) {
+    max-width: 960px;
+  }
+  
+  @media (min-width: $breakpoint-xl) {
+    max-width: 1140px;
+  }
+}
+
+/* Mobile-First Grid System */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+.col {
+  flex: 1;
+  padding: 0 15px;
+}
+
+/* Responsive Typography */
+@media (max-width: $breakpoint-md) {
+  h1 {
+    font-size: 1.8em !important;
+  }
+  
+  h2 {
+    font-size: 1.3em !important;
+  }
+  
+  body {
+    font-size: 14px;
+  }
+}
+
+/* Mobile-Friendly Card Styles */
+.mat-card {
+  @media (max-width: $breakpoint-md) {
+    padding: 12px !important;
+    margin: 8px 0 !important;
+    border-radius: 12px !important;
+  }
+}
+
+/* Mobile-Friendly Form Styles */
+.mat-form-field {
+  @media (max-width: $breakpoint-md) {
+    width: 100% !important;
+  }
+}
+
+/* Mobile-Friendly Button Styles */
+.mat-button, .mat-raised-button, .mat-stroked-button {
+  @media (max-width: $breakpoint-md) {
+    width: 100%;
+    margin: 4px 0 !important;
+    padding: 4px 8px !important;
+  }
+}
+
+/* Mobile-Friendly List Styles */
+.mat-list {
+  @media (max-width: $breakpoint-md) {
+    padding: 0 !important;
+  }
+  
+  .mat-list-item {
+    @media (max-width: $breakpoint-md) {
+      height: auto !important;
+      padding: 8px 0 !important;
+    }
+  }
+}
+
+/* Mobile-Friendly Table Styles */
+.mat-table {
+  @media (max-width: $breakpoint-md) {
+    .mat-header-row {
+      display: none;
+    }
+    
+    .mat-row {
+      display: flex;
+      flex-direction: column;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--color-divider);
+      
+      .mat-cell {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+        border: none;
+        
+        &::before {
+          content: attr(data-label);
+          font-weight: bold;
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+}
+
+/* Mobile-Friendly Dialog Styles */
+.mat-dialog-container {
+  @media (max-width: $breakpoint-md) {
+    padding: 16px !important;
+    max-width: 90vw !important;
+    max-height: 90vh !important;
+  }
+}
+
+/* Mobile-Friendly Spacing Utilities */
+@media (max-width: $breakpoint-md) {
+  .m-sm-0 { margin: 0 !important; }
+  .m-sm-1 { margin: 0.25rem !important; }
+  .m-sm-2 { margin: 0.5rem !important; }
+  .m-sm-3 { margin: 1rem !important; }
+  
+  .p-sm-0 { padding: 0 !important; }
+  .p-sm-1 { padding: 0.25rem !important; }
+  .p-sm-2 { padding: 0.5rem !important; }
+  .p-sm-3 { padding: 1rem !important; }
+}
+
+/* Mobile-Friendly Navigation */
+.nav-toolbar {
+  @media (max-width: $breakpoint-md) {
+    padding: 0 8px !important;
+    
+    .app-title {
+      font-size: 1.2rem !important;
+    }
+    
+    .nav-links {
+      display: none !important;
+    }
+  }
+}
+
+/* Touch-Friendly Interaction Styles */
+@media (max-width: $breakpoint-md) {
+  .clickable, 
+  button,
+  .mat-button,
+  .mat-raised-button,
+  .mat-stroked-button {
+    min-height: 44px; /* Minimum touch target size */
+    line-height: 44px;
+  }
+  
+  /* Increase spacing between interactive elements */
+  .touch-friendly-spacing > * {
+    margin-bottom: 16px !important;
+  }
+}

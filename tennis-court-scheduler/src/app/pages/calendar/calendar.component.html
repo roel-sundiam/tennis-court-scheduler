@@ -1,0 +1,114 @@
+<mat-toolbar color="primary">
+  <span>Tennis Match Calendar</span>
+</mat-toolbar>
+
+<div class="container" *ngIf="!isLoading; else loading">
+  <!-- Calendar Navigation -->
+  <div class="calendar-header">
+    <div class="navigation-controls">
+      <button mat-icon-button (click)="previousMonth()" matTooltip="Previous Month">
+        <mat-icon fontSet="material-symbols-outlined" fontIcon="chevron_left"></mat-icon>
+      </button>
+      <h2>{{ getMonthYearString() }}</h2>
+      <button mat-icon-button (click)="nextMonth()" matTooltip="Next Month">
+        <mat-icon fontSet="material-symbols-outlined" fontIcon="chevron_right"></mat-icon>
+      </button>
+    </div>
+    <button mat-raised-button color="accent" (click)="goToToday()">
+      <mat-icon fontSet="material-symbols-outlined" fontIcon="today"></mat-icon>
+      Today
+    </button>
+  </div>
+
+  <!-- Calendar Grid -->
+  <div class="calendar-grid">
+    <!-- Day Headers -->
+    <div class="day-header" *ngFor="let dayName of ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']">
+      {{ dayName }}
+    </div>
+
+    <!-- Calendar Days -->
+    <div 
+      *ngFor="let day of calendarDays" 
+      class="calendar-day"
+      [class.other-month]="!day.isCurrentMonth"
+      [class.today]="day.isToday"
+      [class.past-day]="day.isPast"
+    >
+      <div class="day-number">{{ day.dayNumber }}</div>
+      
+      <!-- Matches for this day -->
+      <div class="matches-container" *ngIf="day.matches.length > 0">
+        <div 
+          *ngFor="let match of day.matches" 
+          class="match-item match-detail"
+        >
+          <div class="match-time-row">
+            <mat-icon fontSet="material-symbols-outlined" fontIcon="sports_tennis" [style.color]="getMatchStatusColor(match.status) === 'primary' ? '#1976d2' : getMatchStatusColor(match.status) === 'accent' ? '#388e3c' : '#d32f2f'"></mat-icon>
+            <span class="match-time" *ngIf="match.time">{{ match.time }}</span>
+            <span class="match-status-text">{{ getMatchStatusText(match.status) }}</span>
+          </div>
+          <div class="match-teams-row">
+            <span class="team-names">{{ getTeamDisplay(match.team1) }}</span>
+            <span class="vs-text">vs</span>
+            <span class="team-names">{{ getTeamDisplay(match.team2) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- No matches indicator -->
+      <div class="no-matches" *ngIf="day.isCurrentMonth && day.matches.length === 0 && !day.isPast">
+        <span class="no-matches-text">No matches</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <!-- Removed calendar-legend section as requested -->
+
+  <!-- Match Details Modal Trigger -->
+  <div class="match-details-section" *ngIf="getSelectedDateMatches().length > 0">
+    <h3>Matches for {{ getSelectedDateString() }}</h3>
+    <div class="match-details-list">
+      <mat-card *ngFor="let match of getSelectedDateMatches()" class="match-card">
+        <mat-card-content>
+          <div class="match-header">
+            <span class="match-status-badge" [class]="match.status">
+              {{ getMatchStatusText(match.status) }}
+            </span>
+            <span class="match-time" *ngIf="match.time">{{ match.time }}</span>
+          </div>
+          <div class="match-teams">
+            <div class="team">
+              <h4>Team 1</h4>
+              <div class="team-players">
+                <span *ngFor="let player of match.team1.players" class="player">
+                  [{{ player.seed }}] {{ player.name }}
+                </span>
+              </div>
+            </div>
+            <div class="vs-divider">vs</div>
+            <div class="team">
+              <h4>Team 2</h4>
+              <div class="team-players">
+                <span *ngFor="let player of match.team2.players" class="player">
+                  [{{ player.seed }}] {{ player.name }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="container">
+    <mat-card>
+      <mat-card-content>
+        <p>Loading calendar data...</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</ng-template> 

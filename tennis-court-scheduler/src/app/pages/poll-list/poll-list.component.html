@@ -1,0 +1,36 @@
+<!-- Poll List Container -->
+<div class="container">
+  <!-- Welcome Section -->
+  <div class="welcome-section">
+    <mat-card class="welcome-card">
+      <mat-card-content>
+        <div class="welcome-content">
+          <mat-icon class="welcome-icon">sports_tennis</mat-icon>
+          <h1>Tennis Court Scheduler</h1>
+          <p class="welcome-description">
+            Coordinate tennis matches with ease! Vote on available dates, and we'll automatically organize teams based on player availability and skill levels.
+          </p>
+          <div class="welcome-features">
+            <div class="feature-item">
+              <mat-icon>how_to_vote</mat-icon>
+              <span>Vote on preferred dates</span>
+            </div>
+            <div class="feature-item">
+              <mat-icon>groups</mat-icon>
+              <span>Automatic team generation</span>
+            </div>
+            <div class="feature-item">
+              <mat-icon>event</mat-icon>
+              <span>Calendar scheduling</span>
+            </div>
+          </div>
+          <button mat-raised-button color="accent" class="vote-now-btn" (click)="goToVote()" *ngIf="polls && polls.length > 0">
+            <mat-icon>how_to_vote</mat-icon>
+            Vote Now
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+</div>

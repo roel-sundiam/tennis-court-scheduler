@@ -1,0 +1,44 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button routerLink="/">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span>Poll Results</span>
+</mat-toolbar>
+
+<div class="container">
+  <div *ngIf="poll" class="poll-content">
+    <div class="poll-header">
+      <h1>{{ poll.title }} Results</h1>
+      <p>{{ poll.description }}</p>
+    </div>
+
+    <mat-card class="results-card">
+      <mat-card-header>
+        <mat-card-title>Votes by Date</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngFor="let dateOption of getSortedDateOptions()" class="date-result-section">
+          <h3>{{ dateOption.date | date:'fullDate' }} at {{ dateOption.time }}</h3>
+          <p>Total Votes: {{ getVoteCount(dateOption.id) }}</p>
+          <div *ngIf="getVotesForOption(dateOption.id).length > 0" class="voters-list">
+            <h4>Voters:</h4>
+            <div *ngFor="let vote of getVotesForOption(dateOption.id)" class="voter-item">
+              <span>{{ vote.playerName }}</span>
+            </div>
+          </div>
+          <p *ngIf="getVotesForOption(dateOption.id).length === 0" class="no-votes">
+            No votes for this date yet.
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+</div>

@@ -1,0 +1,52 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button routerLink="/">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span>Teams & Matches</span>
+</mat-toolbar>
+
+<div class="container">
+  <div *ngIf="poll" class="poll-content">
+    <div class="poll-header">
+      <h1>{{ poll.title }} - Teams & Matches</h1>
+      <p>{{ poll.description }}</p>
+    </div>
+
+    <mat-card class="teams-matches-card">
+      <mat-card-header>
+        <mat-card-title>Available Dates and Players</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngFor="let dateOption of poll.options" class="date-panel">
+          <h3>{{ dateOption.date | date:'fullDate' }} at {{ dateOption.time }}</h3>
+          <span class="vote-count">{{ getPlayersForOption(dateOption.id).length }} votes</span>
+
+          <div class="voters-list" *ngIf="getPlayersForOption(dateOption.id).length > 0">
+            <h4>Players:</h4>
+            <div *ngFor="let player of getPlayersForOption(dateOption.id)" class="player-item">
+              <span>{{ player.playerName }}</span>
+            </div>
+          </div>
+          <p *ngIf="getPlayersForOption(dateOption.id).length === 0" class="no-voters">
+            No players voted for this date yet.
+          </p>
+
+          <div class="matches-section" *ngIf="getPlayersForOption(dateOption.id).length >= 2">
+            <h4>Generated Matches:</h4>
+            <div *ngFor="let match of generateMatches(getPlayersForOption(dateOption.id))" class="match-item">
+              {{ match }}
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+</div>
