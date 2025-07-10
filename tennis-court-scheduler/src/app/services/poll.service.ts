@@ -3,13 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Poll } from '../models/poll.model';
 import { DateUtilsService } from './date-utils.service';
+import { environment } from '../../environments/environment';
 import { switchMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PollService {
-  private apiUrl = 'http://localhost:3000/polls';
+  private apiUrl = `${environment.apiUrl}/polls`;
 
   constructor(private http: HttpClient, private dateUtils: DateUtilsService) {}
 

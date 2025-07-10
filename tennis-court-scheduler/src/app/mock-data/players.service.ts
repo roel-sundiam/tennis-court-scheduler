@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Player } from './mock-players';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PlayersService {
-  private apiUrl = 'http://localhost:3000/players';
+  private apiUrl = `${environment.apiUrl}/players`;
 
   constructor(private http: HttpClient) { }
 
