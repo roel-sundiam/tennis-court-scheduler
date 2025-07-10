@@ -15,25 +15,32 @@ export class AuthService {
   private userSubject = new BehaviorSubject<User | null>(this.getStoredUser());
   user$ = this.userSubject.asObservable();
 
-  private currentUser = {
-    id: '1',
-    name: 'John Doe',
-    isAdmin: true
-  };
 
   constructor(private router: Router) {}
 
   login(username: string, password: string): Observable<User | null> {
     // Mock admin credentials
-    if (username === 'admin' && password === 'admin123') {
+    const adminUsers = [
+      { username: 'admin', password: 'admin123' },
+      { username: 'sundi', password: 'sundi123' },
+      { username: 'VGTennisMorningCub', password: 'VGTennis123' }  // VG Tennis Morning Club admin
+    ];
+    
+    // Check if credentials match any admin user
+    const adminMatch = adminUsers.find(admin => 
+      admin.username === username && admin.password === password
+    );
+    
+    if (adminMatch) {
       const user: User = {
-        username: 'admin',
+        username: adminMatch.username,
         role: 'admin',
-        token: 'mock-admin-token'
+        token: `mock-admin-token-${adminMatch.username}`
       };
       this.setUser(user);
       return of(user);
     }
+    
     // Mock regular user
     if (username === 'user' && password === 'user123') {
       const user: User = {
@@ -50,7 +57,7 @@ export class AuthService {
   logout() {
     localStorage.removeItem('auth_user');
     this.userSubject.next(null);
-    this.router.navigate(['/login']);
+    this.router.navigate(['/']);
   }
 
   isLoggedIn(): boolean {
@@ -58,15 +65,18 @@ export class AuthService {
   }
 
   isAdmin(): boolean {
-    return this.currentUser.isAdmin;
+    const user = this.userSubject.value;
+    return user?.role === 'admin';
   }
 
   getCurrentUserId(): string {
-    return this.currentUser.id;
+    const user = this.userSubject.value;
+    return user?.username || '';
   }
 
   getCurrentUserName(): string {
-    return this.currentUser.name;
+    const user = this.userSubject.value;
+    return user?.username || '';
   }
 
   getUser(): User | null {

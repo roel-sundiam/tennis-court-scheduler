@@ -59,13 +59,6 @@ export class AppComponent {
       icon: 'sports_tennis',
       description: 'View team assignments',
       adminOnly: false
-    },
-    {
-      label: 'Calendar',
-      route: '/calendar',
-      icon: 'calendar_month',
-      description: 'View matches and schedule',
-      adminOnly: false
     }
   ];
 

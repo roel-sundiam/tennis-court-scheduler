@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -74,12 +74,14 @@ export class PollResultsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private pollService: PollService,
-    private playersService: PlayersService
+    private playersService: PlayersService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.loadPollResults();
     this.loadPlayers();
+    this.loadGeneratedTeams();
   }
 
   loadPollResults() {
@@ -131,6 +133,44 @@ export class PollResultsComponent implements OnInit {
       },
       error: () => {
         console.error('Failed to load players');
+      }
+    });
+  }
+
+  loadGeneratedTeams() {
+    const pollId = this.route.snapshot.paramMap.get('id');
+    if (!pollId) return;
+
+    console.log('Loading generated teams for poll:', pollId);
+    this.pollService.getGeneratedTeams(pollId).subscribe({
+      next: (response) => {
+        console.log('📥 Backend response for generated teams:', response);
+        const savedTeams = response.generatedTeams || [];
+        console.log('📊 Saved teams data:', savedTeams);
+        
+        // Convert saved teams back to the local format
+        savedTeams.forEach((teamData: any) => {
+          console.log('🔄 Restoring teams for date:', teamData.dateId);
+          this.generatedMatches[teamData.dateId] = {
+            dateId: teamData.dateId,
+            algorithm: teamData.algorithm,
+            teams: teamData.teams,
+            matches: teamData.matches,
+            reservePlayers: teamData.reservePlayers
+          };
+          // Also set the selected algorithm for the dropdown
+          this.selectedAlgorithms[teamData.dateId] = teamData.algorithm;
+        });
+        
+        console.log('🎯 Final generatedMatches:', this.generatedMatches);
+        console.log('🎯 Final selectedAlgorithms:', this.selectedAlgorithms);
+        
+        // Force change detection to update the UI
+        this.cdr.detectChanges();
+        console.log('🔄 Triggered change detection');
+      },
+      error: (error) => {
+        console.error('❌ Failed to load generated teams:', error);
       }
     });
   }
@@ -194,12 +234,13 @@ export class PollResultsComponent implements OnInit {
     const pollId = this.route.snapshot.paramMap.get('id');
     if (!pollId) return;
 
+    console.log('Attempting to save teams to backend:', generatedTeamsData);
     this.pollService.saveGeneratedTeams(pollId, generatedTeamsData).subscribe({
       next: (response) => {
-        console.log('Teams saved to backend:', response);
+        console.log('✅ Teams successfully saved to backend:', response);
       },
       error: (error) => {
-        console.error('Failed to save teams to backend:', error);
+        console.error('❌ Failed to save teams to backend:', error);
       }
     });
   }
@@ -300,7 +341,9 @@ export class PollResultsComponent implements OnInit {
   }
 
   hasGeneratedMatches(dateId: string): boolean {
-    return !!this.generatedMatches[dateId];
+    const hasMatches = !!this.generatedMatches[dateId];
+    console.log(`🔍 hasGeneratedMatches(${dateId}):`, hasMatches);
+    return hasMatches;
   }
 
   getGeneratedMatches(dateId: string): GeneratedMatches | undefined {

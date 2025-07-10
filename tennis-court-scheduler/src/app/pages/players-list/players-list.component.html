@@ -32,10 +32,10 @@
         
         <div class="actions-cell" *ngIf="auth.isAdmin()">
           <button class="btn btn-sm btn-outline-primary" [routerLink]="['/players', player.id, 'edit']" [disabled]="saving">
-            <i class="fas fa-edit"></i> Edit
+            <i class="fas fa-edit"></i> <span class="btn-text">Edit</span>
           </button>
           <button class="btn btn-sm btn-outline-danger" (click)="deletePlayer(player.id)" [disabled]="saving">
-            <i class="fas fa-trash"></i> Delete
+            <i class="fas fa-trash"></i> <span class="btn-text">Delete</span>
           </button>
         </div>
       </div>

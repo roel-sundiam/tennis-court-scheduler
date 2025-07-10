@@ -97,12 +97,18 @@ export class TeamsMatchesComponent implements OnInit {
   }
 
   loadGeneratedTeams() {
+    console.log('🔍 Loading generated teams from backend...');
     this.pollService.getGeneratedTeams('1').subscribe({
       next: (response) => {
+        console.log('📥 Backend response:', response);
         this.generatedTeams = response.generatedTeams || [];
+        console.log('🎯 Generated teams loaded:', this.generatedTeams.length, 'entries');
+        if (this.generatedTeams.length === 0) {
+          console.log('✅ No generated teams found - database has been cleared!');
+        }
       },
-      error: () => {
-        console.error('Failed to load generated teams');
+      error: (error) => {
+        console.error('❌ Failed to load generated teams:', error);
       }
     });
   }

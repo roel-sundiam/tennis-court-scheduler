@@ -5,7 +5,6 @@ import { PollResultsComponent } from './pages/poll-results/poll-results.componen
 import { TeamsMatchesComponent } from './pages/teams-matches/teams-matches.component';
 import { PlayersListComponent } from './pages/players-list/players-list.component';
 import { PlayerFormComponent } from './pages/player-form/player-form.component';
-import { CalendarComponent } from './pages/calendar/calendar.component';
 import { LoginComponent } from './pages/login/login.component';
 import { inject } from '@angular/core';
 import { AuthService } from './services/auth.service';
@@ -24,7 +23,6 @@ export const routes: Routes = [
   { path: 'poll/:id', component: PollDetailsComponent },
   { path: 'poll/:id/results', component: PollResultsComponent, canActivate: [adminGuard] },
   { path: 'teams-matches', component: TeamsMatchesComponent },
-  { path: 'calendar', component: CalendarComponent },
   { path: 'login', component: LoginComponent },
   { path: 'players', component: PlayersListComponent, canActivate: [adminGuard] },
   { path: 'players/new', component: PlayerFormComponent, canActivate: [adminGuard] },

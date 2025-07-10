@@ -204,19 +204,27 @@ router.post('/:id/vote', async (req, res) => {
 // Save generated teams for a poll (admin only)
 router.post('/:id/teams', async (req, res) => {
   try {
+    console.log('🔵 POST /polls/:id/teams called with pollId:', req.params.id);
+    console.log('📦 Request body:', JSON.stringify(req.body, null, 2));
+    
     const poll = await Poll.findOne({ id: req.params.id });
     if (!poll) {
+      console.log('❌ Poll not found with id:', req.params.id);
       return res.status(404).json({ message: 'Poll not found' });
     }
 
     const { dateId, algorithm, teams, matches, reservePlayers } = req.body;
     
     if (!dateId || !algorithm || !teams || !matches) {
+      console.log('❌ Missing required data:', { dateId, algorithm, teams: !!teams, matches: !!matches });
       return res.status(400).json({ message: 'Missing required team generation data' });
     }
 
     // Remove existing generated teams for this date
-    poll.generatedTeams = poll.generatedTeams.filter(gt => gt.dateId !== dateId);
+    const beforeCount = poll.generatedTeams ? poll.generatedTeams.length : 0;
+    poll.generatedTeams = poll.generatedTeams ? poll.generatedTeams.filter(gt => gt.dateId !== dateId) : [];
+    const afterFilterCount = poll.generatedTeams.length;
+    console.log(`🗑️ Removed existing teams: ${beforeCount} -> ${afterFilterCount}`);
     
     // Add new generated teams
     poll.generatedTeams.push({
@@ -227,9 +235,13 @@ router.post('/:id/teams', async (req, res) => {
       reservePlayers: reservePlayers || []
     });
 
+    console.log('💾 Saving poll with', poll.generatedTeams.length, 'generated team entries');
     await poll.save();
+    
+    console.log('✅ Teams saved successfully for poll:', req.params.id);
     res.json({ message: 'Teams saved successfully', poll: poll });
   } catch (error) {
+    console.error('❌ Error saving teams:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -237,13 +249,21 @@ router.post('/:id/teams', async (req, res) => {
 // Get generated teams for a poll
 router.get('/:id/teams', async (req, res) => {
   try {
+    console.log('🔵 GET /polls/:id/teams called with pollId:', req.params.id);
+    
     const poll = await Poll.findOne({ id: req.params.id });
     if (!poll) {
+      console.log('❌ Poll not found with id:', req.params.id);
       return res.status(404).json({ message: 'Poll not found' });
     }
 
-    res.json({ generatedTeams: poll.generatedTeams || [] });
+    const generatedTeams = poll.generatedTeams || [];
+    console.log('📤 Returning generated teams:', generatedTeams.length, 'entries');
+    console.log('📊 Teams data:', JSON.stringify(generatedTeams, null, 2));
+
+    res.json({ generatedTeams });
   } catch (error) {
+    console.error('❌ Error getting teams:', error);
     res.status(500).json({ message: error.message });
   }
 });
