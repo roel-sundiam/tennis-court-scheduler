@@ -1,86 +1,653 @@
+// Dark Theme Colors
+:root {
+  --tennis-green: #2e7d32;
+  --tennis-green-light: #4caf50;
+  --tennis-orange: #ff7a1a;
+  --tennis-orange-light: #ffab40;
+  --court-surface: #1e3c72;
+  --court-surface-light: #2a5298;
+  --bg-dark: #232323;
+  --bg-card: #2d2d2d;
+  --bg-elevated: #333;
+  --text-primary: #f5f5f5;
+  --text-secondary: #bdbdbd;
+  --border-color: #444;
+  --shadow-color: rgba(0,0,0,0.4);
+}
+
+// Reduce overall font size to 80%
+:host {
+  font-size: 0.8rem;
+}
+
 .container {
-  padding: 16px;
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 }
 
-.result-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  padding: 8px;
-  border-radius: 4px;
+.poll-content {
+  min-height: 400px;
 }
 
-.most-popular {
-  background-color: rgba(0, 200, 83, 0.1);
-  font-weight: bold;
+.poll-header {
+  text-align: center;
+  margin-bottom: 32px;
+  
+  h1 {
+    color: #888;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: var(--tennis-orange);
+      border-radius: 2px;
+    }
+    
+    @media (max-width: 768px) {
+      font-size: 1.6rem;
+    }
+  }
+  
+  p {
+    color: #999;
+    font-size: 0.9rem;
+    margin: 0;
+  }
 }
 
-.votes {
-  font-weight: bold;
+.results-card {
+  background: var(--bg-card) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px var(--shadow-color) !important;
+  overflow: hidden;
+  
+  mat-card-header {
+    background: linear-gradient(135deg, var(--court-surface) 0%, var(--court-surface-light) 100%);
+    color: white;
+    padding: 24px;
+    margin: 0;
+    
+    mat-card-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      &::before {
+        content: '🎾';
+        font-size: 1.8rem;
+      }
+    }
+  }
+  
+  mat-card-content {
+    padding: 24px;
+    
+    @media (max-width: 768px) {
+      padding: 16px;
+    }
+  }
 }
 
-.date-panel {
-  margin-bottom: 20px;
+.date-result-section {
+  margin-bottom: 48px;
+  padding: 24px;
+  background: var(--bg-elevated);
+  border-radius: 12px;
+  border-left: 4px solid var(--tennis-green);
+  
+  @media (max-width: 768px) {
+    margin-bottom: 32px;
+    padding: 16px;
+  }
+  
+  h3 {
+    color: var(--tennis-green-light);
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    &::before {
+      content: '📅';
+      font-size: 1.2rem;
+    }
+  }
+  
+  > p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
 }
 
-.player-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
+.voters-section {
+  margin: 24px 0;
+  
+  h4 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    &::before {
+      content: '👥';
+      font-size: 1rem;
+    }
+  }
 }
 
-.button-group {
+.voters-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin: 16px 0;
+  gap: 8px;
+  
+  .voter-item {
+    background: linear-gradient(135deg, var(--tennis-green) 0%, var(--tennis-green-light) 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+    transition: transform 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+    
+    span {
+      color: white;
+    }
+  }
 }
 
-.team-row, .match-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.team-player {
-  background: #e3e3f7;
-  border-radius: 12px;
-  padding: 2px 10px;
-  margin-right: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #3f51b5;
-}
-
-.seed-circle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  height: 24px;
-  background-color: #3f51b5;
-  color: white;
-  border-radius: 50%;
-  font-weight: 500;
-  margin-right: 8px;
-  font-size: 12px;
-}
-
-.no-voters {
-  color: #888;
+.no-votes {
+  color: var(--text-secondary);
   font-style: italic;
-  font-size: 13px;
+  margin: 24px 0;
+  text-align: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
 }
 
-.mt-4 {
-  margin-top: 24px;
+// Team Generation Styles
+.team-generation-section {
+  margin-top: 32px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(30, 60, 114, 0.1) 0%, rgba(42, 82, 152, 0.1) 100%);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+  
+  h4 {
+    color: var(--tennis-orange);
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    &::before {
+      content: '🏆';
+      font-size: 1.2rem;
+    }
+  }
 }
 
-.actions {
-  margin-top: 24px;
+.algorithm-selection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .custom-select-wrapper {
+    flex: 1;
+    min-width: 280px;
+    position: relative;
+    
+    @media (max-width: 768px) {
+      min-width: 100%;
+    }
+    
+    .select-label {
+      display: block;
+      color: #bdbdbd;
+      font-weight: 500;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+    
+    .custom-select {
+      width: 100%;
+      height: 56px;
+      background: linear-gradient(135deg, #333 0%, rgba(30, 60, 114, 0.2) 100%);
+      border: 2px solid #444;
+      border-radius: 12px;
+      color: #f5f5f5;
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 16px 48px 16px 16px;
+      appearance: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        border-color: #ff7a1a;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 122, 26, 0.3);
+      }
+      
+      &:focus {
+        outline: none;
+        border-color: #ff7a1a;
+        box-shadow: 0 0 0 3px rgba(255, 122, 26, 0.2);
+      }
+      
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      option {
+        background: #333;
+        color: #f5f5f5;
+        padding: 12px;
+        font-weight: 500;
+        
+        &:hover {
+          background: #ff7a1a;
+        }
+        
+        &:checked {
+          background: #2e7d32;
+        }
+        
+        &[disabled] {
+          color: #888;
+          font-style: italic;
+        }
+      }
+    }
+    
+    // Custom dropdown arrow
+    &::after {
+      content: '▼';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #ff7a1a;
+      font-size: 0.8rem;
+      pointer-events: none;
+      margin-top: 12px; // Account for label
+    }
+  }
+  
+  button {
+    height: 56px;
+    background: linear-gradient(135deg, var(--tennis-orange) 0%, var(--tennis-orange-light) 100%) !important;
+    color: white !important;
+    border-radius: 28px !important;
+    font-weight: 600;
+    padding: 0 24px;
+    box-shadow: 0 4px 16px rgba(255, 122, 26, 0.3);
+    transition: all 0.3s ease;
+    
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 122, 26, 0.4);
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    @media (max-width: 768px) {
+      width: 100%;
+      margin-top: 8px;
+    }
+  }
 }
 
-mat-card {
-  margin-bottom: 16px;
+.generated-teams {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 20px;
+  box-shadow: 0 4px 16px var(--shadow-color);
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 }
+
+.teams-header {
+  margin-bottom: 24px;
+  text-align: center;
+  
+  h5 {
+    color: var(--tennis-green-light);
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+    text-transform: capitalize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    
+    &::before {
+      content: '🎯';
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.match-card {
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px var(--shadow-color);
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--tennis-orange);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+  
+  h6 {
+    text-align: center;
+    color: var(--tennis-orange);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0 0 20px 0;
+    background: linear-gradient(135deg, var(--tennis-orange) 0%, var(--tennis-orange-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+.teams-vs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+.team {
+  flex: 1;
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.1) 0%, rgba(76, 175, 80, 0.1) 100%);
+  border: 1px solid var(--tennis-green);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.02);
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 16px;
+  }
+  
+  .team-header {
+    font-weight: 600;
+    color: var(--tennis-green-light);
+    margin-bottom: 16px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .player {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    padding: 8px 0;
+    
+    .seed {
+      background: linear-gradient(135deg, var(--tennis-green) 0%, var(--tennis-green-light) 100%);
+      color: white;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+      margin-right: 12px;
+      box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+    }
+    
+    .name {
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+  }
+  
+  .avg-seed {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 12px;
+    font-style: italic;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-color);
+  }
+}
+
+.vs {
+  font-weight: bold;
+  color: var(--tennis-orange);
+  font-size: 1.4rem;
+  background: var(--bg-card);
+  padding: 12px 16px;
+  border-radius: 50%;
+  border: 2px solid var(--tennis-orange);
+  min-width: 48px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(255, 122, 26, 0.3);
+  
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+    padding: 8px 12px;
+    min-width: 40px;
+  }
+}
+
+.reserve-players {
+  background: var(--bg-elevated);
+  border: 2px solid var(--tennis-orange);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+  
+  h6 {
+    color: var(--tennis-orange);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    &::before {
+      content: '🪑';
+      font-size: 1rem;
+    }
+  }
+}
+
+.reserve-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  
+  .reserve-player {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(255, 122, 26, 0.1) 0%, rgba(255, 171, 64, 0.1) 100%);
+    border: 1px solid var(--tennis-orange);
+    border-radius: 24px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    transition: transform 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+    
+    .seed {
+      background: linear-gradient(135deg, var(--tennis-orange) 0%, var(--tennis-orange-light) 100%);
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: bold;
+      margin-right: 8px;
+      box-shadow: 0 2px 8px rgba(255, 122, 26, 0.3);
+    }
+    
+    .name {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+  }
+}
+
+.insufficient-players {
+  background: rgba(255, 122, 26, 0.1);
+  border: 2px solid #ff7a1a;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+  
+  p {
+    margin: 0;
+    color: #ff7a1a;
+    font-weight: 500;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    
+    &::before {
+      content: '⚠️';
+      font-size: 1.2rem;
+    }
+  }
+}
+
+// Loading and Error States
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  
+  mat-spinner {
+    ::ng-deep circle {
+      stroke: var(--tennis-orange);
+    }
+  }
+}
+
+.error {
+  color: #f44336;
+  font-weight: 500;
+  text-align: center;
+  padding: 20px;
+  background: rgba(244, 67, 54, 0.1);
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .algorithm-selection {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .teams-vs {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .reserve-list {
+    justify-content: center;
+  }
+  
+  .voters-list {
+    justify-content: center;
+  }
+}
+
+// Custom select styling is now handled above - no Material dropdown styling needed

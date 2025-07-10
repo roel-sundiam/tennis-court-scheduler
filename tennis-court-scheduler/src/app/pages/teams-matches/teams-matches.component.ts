@@ -4,8 +4,33 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
-import { Poll, DateOption, Vote } from '../../models/poll.model';
+import { Poll, Vote } from '../../models/poll.model';
 import { PollService } from '../../services/poll.service';
+import { PlayersService } from '../../mock-data/players.service';
+import { Player } from '../../mock-data/mock-players';
+
+// Interfaces for generated teams data
+interface Team {
+  id: string;
+  player1: Player;
+  player2: Player;
+  averageSeed: number;
+}
+
+interface Match {
+  id: string;
+  teamA: Team;
+  teamB: Team;
+}
+
+interface GeneratedTeams {
+  dateId: string;
+  algorithm: string;
+  teams: Team[];
+  matches: Match[];
+  reservePlayers: Player[];
+  createdAt?: string;
+}
 
 @Component({
   selector: 'app-teams-matches',
@@ -22,59 +47,120 @@ import { PollService } from '../../services/poll.service';
 })
 export class TeamsMatchesComponent implements OnInit {
   poll: Poll | undefined;
+  players: Player[] = [];
+  generatedTeams: GeneratedTeams[] = [];
   loading = false;
   error = '';
 
-  constructor(private pollService: PollService) {}
+  constructor(
+    private pollService: PollService,
+    private playersService: PlayersService
+  ) {}
 
   ngOnInit() {
-    this.loadLatestPoll();
+    this.loadData();
   }
 
-  loadLatestPoll() {
+  loadData() {
     this.loading = true;
-    this.pollService.getPolls().subscribe({
-      next: (polls) => {
-        if (polls && polls.length > 0) {
-          // Assuming the latest poll is the one we care about for teams/matches
-          this.poll = polls[0]; 
+    this.loadPoll();
+    this.loadPlayers();
+    this.loadGeneratedTeams();
+  }
+
+  loadPoll() {
+    this.pollService.getPollById('1').subscribe({
+      next: (poll) => {
+        if (poll) {
+          this.poll = poll;
         } else {
-          this.error = 'No polls available to generate teams and matches.';
+          this.error = 'Poll not found';
         }
         this.loading = false;
       },
       error: () => {
-        this.error = 'Failed to load polls for teams and matches.';
+        this.error = 'Failed to load poll';
         this.loading = false;
       }
     });
   }
 
-  getPlayersForOption(optionId: string): Vote[] {
-    const option = this.poll?.options.find((opt: DateOption) => opt.id === optionId);
-    return option?.votes || [];
-  }
-
-  // Helper to format team names (e.g., "Player A / Player B")
-  formatTeam(player1: Vote, player2: Vote): string {
-    return `${player1.playerName} / ${player2.playerName}`;
-  }
-
-  // Placeholder for generating matches (e.g., simple pairs)
-  generateMatches(players: Vote[]): string[] {
-    const matches: string[] = [];
-    if (players.length < 2) {
-      return matches;
-    }
-
-    // Simple pairing for demonstration
-    for (let i = 0; i < players.length; i += 2) {
-      if (players[i + 1]) {
-        matches.push(this.formatTeam(players[i], players[i + 1]));
-      } else {
-        matches.push(`${players[i].playerName} (waiting for partner)`);
+  loadPlayers() {
+    this.playersService.getPlayers().subscribe({
+      next: (players) => {
+        this.players = players;
+      },
+      error: () => {
+        console.error('Failed to load players');
       }
+    });
+  }
+
+  loadGeneratedTeams() {
+    this.pollService.getGeneratedTeams('1').subscribe({
+      next: (response) => {
+        this.generatedTeams = response.generatedTeams || [];
+      },
+      error: () => {
+        console.error('Failed to load generated teams');
+      }
+    });
+  }
+
+  // Get sorted date options
+  getSortedDateOptions() {
+    if (!this.poll?.options) return [];
+    return [...this.poll.options].sort((a, b) => 
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+  }
+
+  // Get players who voted for a specific date with full player data
+  getPlayersForDate(dateId: string): Player[] {
+    if (!this.poll?.votes || !this.players.length) return [];
+    
+    // Find all votes that include this dateId
+    const voterIds = this.poll.votes
+      .filter(vote => vote.optionIds?.includes(dateId))
+      .map(vote => vote.playerId);
+    
+    // Get full player data for these voters and sort by seed
+    return this.players
+      .filter(player => voterIds.includes(player.id))
+      .sort((a, b) => a.seed - b.seed); // Sort by seed (1 = best)
+  }
+
+  // Get generated teams for a specific date
+  getGeneratedTeamsForDate(dateId: string): GeneratedTeams | undefined {
+    return this.generatedTeams.find(gt => gt.dateId === dateId);
+  }
+
+  // Check if date has generated teams
+  hasGeneratedTeams(dateId: string): boolean {
+    return !!this.getGeneratedTeamsForDate(dateId);
+  }
+
+  // Check if date has enough players for matches
+  hasEnoughPlayers(dateId: string): boolean {
+    return this.getPlayersForDate(dateId).length >= 4;
+  }
+
+  // Get vote count for a date
+  getVoteCount(dateId: string): number {
+    return this.getPlayersForDate(dateId).length;
+  }
+
+  // Format algorithm name for display
+  formatAlgorithmName(algorithm: string): string {
+    switch (algorithm) {
+      case 'random':
+        return 'Random Teams';
+      case 'balanced':
+        return 'Balanced (Top vs Bottom)';
+      case 'grouped':
+        return 'Skill-Level Groups';
+      default:
+        return algorithm;
     }
-    return matches;
   }
 }

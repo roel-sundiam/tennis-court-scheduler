@@ -201,6 +201,53 @@ router.post('/:id/vote', async (req, res) => {
   }
 });
 
+// Save generated teams for a poll (admin only)
+router.post('/:id/teams', async (req, res) => {
+  try {
+    const poll = await Poll.findOne({ id: req.params.id });
+    if (!poll) {
+      return res.status(404).json({ message: 'Poll not found' });
+    }
+
+    const { dateId, algorithm, teams, matches, reservePlayers } = req.body;
+    
+    if (!dateId || !algorithm || !teams || !matches) {
+      return res.status(400).json({ message: 'Missing required team generation data' });
+    }
+
+    // Remove existing generated teams for this date
+    poll.generatedTeams = poll.generatedTeams.filter(gt => gt.dateId !== dateId);
+    
+    // Add new generated teams
+    poll.generatedTeams.push({
+      dateId,
+      algorithm,
+      teams,
+      matches,
+      reservePlayers: reservePlayers || []
+    });
+
+    await poll.save();
+    res.json({ message: 'Teams saved successfully', poll: poll });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get generated teams for a poll
+router.get('/:id/teams', async (req, res) => {
+  try {
+    const poll = await Poll.findOne({ id: req.params.id });
+    if (!poll) {
+      return res.status(404).json({ message: 'Poll not found' });
+    }
+
+    res.json({ generatedTeams: poll.generatedTeams || [] });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Delete a poll
 router.delete('/:id', async (req, res) => {
   try {

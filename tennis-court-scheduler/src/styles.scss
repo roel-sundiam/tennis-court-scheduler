@@ -322,3 +322,59 @@ $breakpoint-xl: 1200px;
     margin-bottom: 16px !important;
   }
 }
+
+/* Global dropdown styling for tennis theme */
+.mat-select-panel {
+  background: #2d2d2d !important;
+  border-radius: 12px !important;
+  border: 2px solid #ff7a1a !important;
+  box-shadow: 0 8px 24px rgba(255, 122, 26, 0.4) !important;
+  
+  .mat-option {
+    background: transparent !important;
+    color: #f5f5f5 !important;
+    font-weight: 500 !important;
+    padding: 16px 20px !important;
+    border-radius: 8px !important;
+    margin: 4px 8px !important;
+    transition: all 0.2s ease !important;
+    position: relative !important;
+    
+    &::before {
+      content: '🎯';
+      margin-right: 8px;
+      font-size: 1.1rem;
+      opacity: 0.7;
+    }
+    
+    &:hover {
+      background: linear-gradient(135deg, #ff7a1a 0%, #ffab40 100%) !important;
+      color: white !important;
+      transform: translateX(4px) !important;
+      
+      &::before {
+        opacity: 1;
+      }
+    }
+    
+    &.mat-selected {
+      background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%) !important;
+      color: white !important;
+      
+      &::before {
+        content: '✓';
+        color: white;
+        opacity: 1;
+      }
+      
+      &:hover {
+        background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%) !important;
+      }
+    }
+    
+    .mat-option-text {
+      font-size: 0.95rem !important;
+      font-weight: 500 !important;
+    }
+  }
+}

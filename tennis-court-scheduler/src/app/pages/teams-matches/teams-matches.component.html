@@ -6,36 +6,119 @@
 </mat-toolbar>
 
 <div class="container">
-  <div *ngIf="poll" class="poll-content">
+  <div *ngIf="poll && !loading" class="poll-content">
     <div class="poll-header">
-      <h1>{{ poll.title }} - Teams & Matches</h1>
+      <h1>{{ poll.title }}</h1>
       <p>{{ poll.description }}</p>
     </div>
 
     <mat-card class="teams-matches-card">
       <mat-card-header>
-        <mat-card-title>Available Dates and Players</mat-card-title>
+        <mat-card-title>🎾 Generated Teams & Matches</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div *ngFor="let dateOption of poll.options" class="date-panel">
-          <h3>{{ dateOption.date | date:'fullDate' }} at {{ dateOption.time }}</h3>
-          <span class="vote-count">{{ getPlayersForOption(dateOption.id).length }} votes</span>
-
-          <div class="voters-list" *ngIf="getPlayersForOption(dateOption.id).length > 0">
-            <h4>Players:</h4>
-            <div *ngFor="let player of getPlayersForOption(dateOption.id)" class="player-item">
-              <span>{{ player.playerName }}</span>
+        <div *ngFor="let dateOption of getSortedDateOptions()" class="date-section">
+          <div class="date-header">
+            <h3>📅 {{ dateOption.date | date:'fullDate' }}</h3>
+            <div class="date-stats">
+              <span class="vote-count">{{ getVoteCount(dateOption.id) }} players</span>
             </div>
           </div>
-          <p *ngIf="getPlayersForOption(dateOption.id).length === 0" class="no-voters">
-            No players voted for this date yet.
-          </p>
 
-          <div class="matches-section" *ngIf="getPlayersForOption(dateOption.id).length >= 2">
-            <h4>Generated Matches:</h4>
-            <div *ngFor="let match of generateMatches(getPlayersForOption(dateOption.id))" class="match-item">
-              {{ match }}
+          <!-- Generated Teams Display -->
+          <div *ngIf="hasGeneratedTeams(dateOption.id)" class="generated-teams-section">
+            <ng-container *ngFor="let teamsData of [getGeneratedTeamsForDate(dateOption.id)]">
+              <div class="algorithm-info">
+                <span class="algorithm-badge">🎯 {{ formatAlgorithmName(teamsData!.algorithm) }}</span>
+                <span class="generation-time" *ngIf="teamsData!.createdAt">
+                  Generated {{ teamsData!.createdAt | date:'short' }}
+                </span>
+              </div>
+
+              <!-- Matches -->
+              <div class="matches-container">
+                <h4 class="section-title">🏆 Matches</h4>
+                <div *ngFor="let match of teamsData!.matches" class="match-card">
+                  <div class="match-header">
+                    <span class="match-number">{{ match.id.split('-')[1] | number }}</span>
+                  </div>
+                  
+                  <div class="teams-vs">
+                    <!-- Team A -->
+                    <div class="team">
+                      <div class="team-header">Team A</div>
+                      <div class="team-players">
+                        <div class="player">
+                          <span class="seed">#{{ match.teamA.player1.seed }}</span>
+                          <span class="name">{{ match.teamA.player1.name }}</span>
+                        </div>
+                        <div class="player">
+                          <span class="seed">#{{ match.teamA.player2.seed }}</span>
+                          <span class="name">{{ match.teamA.player2.name }}</span>
+                        </div>
+                      </div>
+                      <div class="avg-seed">Avg: {{ match.teamA.averageSeed | number:'1.1-1' }}</div>
+                    </div>
+                    
+                    <div class="vs">VS</div>
+                    
+                    <!-- Team B -->
+                    <div class="team">
+                      <div class="team-header">Team B</div>
+                      <div class="team-players">
+                        <div class="player">
+                          <span class="seed">#{{ match.teamB.player1.seed }}</span>
+                          <span class="name">{{ match.teamB.player1.name }}</span>
+                        </div>
+                        <div class="player">
+                          <span class="seed">#{{ match.teamB.player2.seed }}</span>
+                          <span class="name">{{ match.teamB.player2.name }}</span>
+                        </div>
+                      </div>
+                      <div class="avg-seed">Avg: {{ match.teamB.averageSeed | number:'1.1-1' }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reserve Players -->
+              <div *ngIf="teamsData!.reservePlayers && teamsData!.reservePlayers.length > 0" 
+                   class="reserve-players-section">
+                <h4 class="section-title">🪑 Reserve Players</h4>
+                <div class="reserve-players">
+                  <div *ngFor="let player of teamsData!.reservePlayers" class="reserve-player">
+                    <span class="seed">#{{ player.seed }}</span>
+                    <span class="name">{{ player.name }}</span>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- Players List (when no teams generated) -->
+          <div *ngIf="!hasGeneratedTeams(dateOption.id) && getPlayersForDate(dateOption.id).length > 0" 
+               class="players-section">
+            <h4 class="section-title">👥 Players</h4>
+            <div class="players-list">
+              <div *ngFor="let player of getPlayersForDate(dateOption.id)" class="player-item">
+                <span class="seed">#{{ player.seed }}</span>
+                <span class="name">{{ player.name }}</span>
+              </div>
             </div>
+            
+            <div *ngIf="hasEnoughPlayers(dateOption.id)" class="teams-pending">
+              <span class="pending-message">⏳ Waiting for admin to generate teams</span>
+            </div>
+            <div *ngIf="!hasEnoughPlayers(dateOption.id)" class="insufficient-players">
+              <span class="insufficient-message">
+                ⚠️ Need {{ 4 - getPlayersForDate(dateOption.id).length }} more players for doubles matches
+              </span>
+            </div>
+          </div>
+
+          <!-- No Players -->
+          <div *ngIf="getPlayersForDate(dateOption.id).length === 0" class="no-players">
+            <span class="no-players-message">📝 No players have voted for this date yet</span>
           </div>
         </div>
       </mat-card-content>
@@ -44,9 +127,11 @@
 
   <div *ngIf="loading" class="loading">
     <mat-spinner></mat-spinner>
+    <p>Loading teams and matches...</p>
   </div>
 
   <div *ngIf="error" class="error">
-    {{ error }}
+    <mat-icon>error</mat-icon>
+    <span>{{ error }}</span>
   </div>
 </div>

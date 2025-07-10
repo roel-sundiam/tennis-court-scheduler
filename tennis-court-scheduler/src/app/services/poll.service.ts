@@ -64,4 +64,14 @@ export class PollService {
       })
     );
   }
+
+  // Save generated teams to backend
+  saveGeneratedTeams(pollId: string, generatedTeamsData: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${pollId}/teams`, generatedTeamsData);
+  }
+
+  // Get generated teams from backend
+  getGeneratedTeams(pollId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${pollId}/teams`);
+  }
 }

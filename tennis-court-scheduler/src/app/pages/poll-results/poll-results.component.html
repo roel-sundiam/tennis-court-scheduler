@@ -18,17 +18,108 @@
       </mat-card-header>
       <mat-card-content>
         <div *ngFor="let dateOption of getSortedDateOptions()" class="date-result-section">
-          <h3>{{ dateOption.date | date:'fullDate' }} at {{ dateOption.time }}</h3>
+          <h3>{{ dateOption.date | date:'fullDate' }}</h3>
           <p>Total Votes: {{ getVoteCount(dateOption.id) }}</p>
-          <div *ngIf="getVotesForOption(dateOption.id).length > 0" class="voters-list">
-            <h4>Voters:</h4>
-            <div *ngFor="let vote of getVotesForOption(dateOption.id)" class="voter-item">
-              <span>{{ vote.playerName }}</span>
+          
+          <!-- Voters List -->
+          <div *ngIf="getPlayersForDate(dateOption.id).length > 0" class="voters-section">
+            <h4>Players:</h4>
+            <div class="voters-list">
+              <div *ngFor="let player of getPlayersForDate(dateOption.id)" class="voter-item">
+                <span>{{ player.name }}</span>
+              </div>
             </div>
           </div>
-          <p *ngIf="getVotesForOption(dateOption.id).length === 0" class="no-votes">
+          
+          <p *ngIf="getPlayersForDate(dateOption.id).length === 0" class="no-votes">
             No votes for this date yet.
           </p>
+
+          <!-- Team Generation Section -->
+          <div *ngIf="getPlayersForDate(dateOption.id).length >= 4" class="team-generation-section">
+            <mat-divider></mat-divider>
+            <h4>Team Generation</h4>
+            
+            <!-- Algorithm Selection -->
+            <div class="algorithm-selection">
+              <div class="custom-select-wrapper">
+                <label class="select-label">🎯 Algorithm</label>
+                <select class="custom-select" [(ngModel)]="selectedAlgorithms[dateOption.id]">
+                  <option value="" disabled>Choose team generation method...</option>
+                  <option *ngFor="let algo of algorithmOptions" [value]="algo.value">
+                    {{ algo.label }}
+                  </option>
+                </select>
+              </div>
+              
+              <button mat-raised-button color="primary" 
+                      (click)="generateTeams(dateOption.id)"
+                      [disabled]="!selectedAlgorithms[dateOption.id]">
+                {{ hasGeneratedMatches(dateOption.id) ? 'Regenerate Teams' : 'Generate Teams' }}
+              </button>
+            </div>
+
+            <!-- Generated Teams Display -->
+            <div *ngIf="hasGeneratedMatches(dateOption.id)" class="generated-teams">
+              <div class="teams-header">
+                <h5>Generated Teams ({{ getGeneratedMatches(dateOption.id)?.algorithm }})</h5>
+              </div>
+              
+              <!-- Matches -->
+              <div *ngFor="let match of getGeneratedMatches(dateOption.id)?.matches" class="match-card">
+                <h6>Match {{ match.id.split('-')[1] }}</h6>
+                <div class="teams-vs">
+                  <!-- Team A -->
+                  <div class="team">
+                    <div class="team-header">Team A</div>
+                    <div class="player">
+                      <span class="seed">#{{ match.teamA.player1.seed }}</span>
+                      <span class="name">{{ match.teamA.player1.name }}</span>
+                    </div>
+                    <div class="player">
+                      <span class="seed">#{{ match.teamA.player2.seed }}</span>
+                      <span class="name">{{ match.teamA.player2.name }}</span>
+                    </div>
+                    <div class="avg-seed">Avg Seed: {{ match.teamA.averageSeed | number:'1.1-1' }}</div>
+                  </div>
+                  
+                  <div class="vs">VS</div>
+                  
+                  <!-- Team B -->
+                  <div class="team">
+                    <div class="team-header">Team B</div>
+                    <div class="player">
+                      <span class="seed">#{{ match.teamB.player1.seed }}</span>
+                      <span class="name">{{ match.teamB.player1.name }}</span>
+                    </div>
+                    <div class="player">
+                      <span class="seed">#{{ match.teamB.player2.seed }}</span>
+                      <span class="name">{{ match.teamB.player2.name }}</span>
+                    </div>
+                    <div class="avg-seed">Avg Seed: {{ match.teamB.averageSeed | number:'1.1-1' }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Reserve Players -->
+              <div *ngIf="getGeneratedMatches(dateOption.id)?.reservePlayers && getGeneratedMatches(dateOption.id)?.reservePlayers && getGeneratedMatches(dateOption.id)!.reservePlayers.length > 0" 
+                   class="reserve-players">
+                <h6>Reserve Players</h6>
+                <div class="reserve-list">
+                  <span *ngFor="let player of getGeneratedMatches(dateOption.id)!.reservePlayers" class="reserve-player">
+                    <span class="seed">#{{ player.seed }}</span>
+                    <span class="name">{{ player.name }}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Insufficient Players Message -->
+          <div *ngIf="getPlayersForDate(dateOption.id).length > 0 && getPlayersForDate(dateOption.id).length < 4" 
+               class="insufficient-players">
+            <p>Need at least 4 players to generate teams ({{ 4 - getPlayersForDate(dateOption.id).length }} more needed)</p>
+          </div>
         </div>
       </mat-card-content>
     </mat-card>
