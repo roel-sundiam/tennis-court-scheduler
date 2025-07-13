@@ -1,0 +1,37 @@
+<div class="coin-balance-container">
+  <!-- RoelSundiam - Unlimited Display -->
+  <div *ngIf="isRoelSundiam()" class="coin-display unlimited" 
+       [matTooltip]="'Unlimited access to all features'" 
+       matTooltipPosition="below">
+    
+    <div *ngIf="!isLoading" class="balance-content">
+      <mat-icon class="unlimited-icon">all_inclusive</mat-icon>
+      <span class="balance-text">Unlimited</span>
+    </div>
+  </div>
+  
+  <!-- All Other Users - Shared Club Balance -->
+  <div *ngIf="!isRoelSundiam()" class="coin-display club-balance" 
+       [matTooltip]="getTooltipText()" 
+       matTooltipPosition="below"
+       [style.color]="getBalanceColor()">
+    
+    <!-- Loading spinner -->
+    <div *ngIf="isLoading" class="loading-spinner">
+      <mat-icon class="spin">refresh</mat-icon>
+    </div>
+    
+    <!-- Club balance display -->
+    <div *ngIf="!isLoading" class="balance-content">
+      <mat-icon class="coin-icon">toll</mat-icon>
+      <span class="balance-text">{{ formatBalance() }}</span>
+      <mat-icon class="add-icon" *ngIf="balance <= 15">add_circle</mat-icon>
+    </div>
+  </div>
+  
+  <!-- Low balance warning (only for club members) -->
+  <div *ngIf="!isRoelSundiam() && balance <= 5 && !isLoading" class="warning-badge">
+    <mat-icon>warning</mat-icon>
+    <span>Low</span>
+  </div>
+</div>

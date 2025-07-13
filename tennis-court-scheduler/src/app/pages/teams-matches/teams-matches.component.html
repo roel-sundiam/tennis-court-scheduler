@@ -6,6 +6,39 @@
 </mat-toolbar>
 
 <div class="container">
+  <!-- Access Denied State -->
+  <div *ngIf="!hasAccess" class="access-denied">
+    <mat-card class="premium-card">
+      <mat-card-header>
+        <mat-icon class="premium-icon">sports_tennis</mat-icon>
+        <mat-card-title>Premium Feature</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Access to Teams & Matches requires {{ pageCost }} coin{{ pageCost > 1 ? 's' : '' }}.</p>
+        <p *ngIf="!coinService.hasUnlimitedAccess()">
+          Current balance: {{ coinBalance }} coin{{ coinBalance === 1 ? '' : 's' }}
+        </p>
+        <div class="access-actions">
+          <button mat-raised-button 
+                  color="accent" 
+                  (click)="checkPageAccess()"
+                  [disabled]="!coinService.canAfford('TEAMS_MATCHES_VIEW')">
+            <mat-icon>payment</mat-icon>
+            Purchase Access ({{ pageCost }} 🪙)
+          </button>
+          <button mat-stroked-button 
+                  (click)="openPurchaseModal()"
+                  *ngIf="!coinService.canAfford('TEAMS_MATCHES_VIEW')">
+            <mat-icon>shopping_cart</mat-icon>
+            Buy More Coins
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Main Content (Accessible) -->
+  <div *ngIf="hasAccess">
   <div *ngIf="poll && !loading" class="poll-content">
     <div class="poll-header">
       <h1>{{ poll.title }}</h1>
@@ -15,6 +48,11 @@
     <mat-card class="teams-matches-card">
       <mat-card-header>
         <mat-card-title>🎾 Generated Teams & Matches</mat-card-title>
+        <div class="header-actions">
+          <button mat-icon-button (click)="refreshTeams()" title="Refresh teams data">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </div>
       </mat-card-header>
       <mat-card-content>
         <div *ngFor="let dateOption of getSortedDateOptions()" class="date-section">
@@ -84,9 +122,35 @@
               <!-- Reserve Players -->
               <div *ngIf="teamsData!.reservePlayers && teamsData!.reservePlayers.length > 0" 
                    class="reserve-players-section">
-                <h4 class="section-title">🪑 Reserve Players</h4>
-                <div class="reserve-players">
-                  <div *ngFor="let player of teamsData!.reservePlayers" class="reserve-player">
+                <div class="reserve-players-header">
+                  <h4 class="section-title">🪑 Reserve Players ({{ teamsData!.reservePlayers.length }})</h4>
+                  <button mat-icon-button [matMenuTriggerFor]="reserveViewMenu" class="view-toggle-btn">
+                    <mat-icon>{{ isCompactView ? 'view_list' : 'view_module' }}</mat-icon>
+                  </button>
+                  <mat-menu #reserveViewMenu="matMenu">
+                    <button mat-menu-item (click)="isCompactView = true">
+                      <mat-icon>view_module</mat-icon>
+                      <span>Compact View</span>
+                    </button>
+                    <button mat-menu-item (click)="isCompactView = false">
+                      <mat-icon>view_list</mat-icon>
+                      <span>Detailed View</span>
+                    </button>
+                  </mat-menu>
+                </div>
+                
+                <!-- Compact View -->
+                <div *ngIf="isCompactView" class="reserve-players compact">
+                  <div *ngFor="let player of teamsData!.reservePlayers; let i = index" class="reserve-player compact">
+                    <span class="player-number">{{ i + 1 }}</span>
+                    <span class="player-name">{{ player.name }}</span>
+                    <span class="player-seed">#{{ player.seed }}</span>
+                  </div>
+                </div>
+                
+                <!-- Detailed View (Original) -->
+                <div *ngIf="!isCompactView" class="reserve-players detailed">
+                  <div *ngFor="let player of teamsData!.reservePlayers" class="reserve-player detailed">
                     <span class="seed">#{{ player.seed }}</span>
                     <span class="name">{{ player.name }}</span>
                   </div>
@@ -98,16 +162,45 @@
           <!-- Players List (when no teams generated) -->
           <div *ngIf="!hasGeneratedTeams(dateOption.id) && getPlayersForDate(dateOption.id).length > 0" 
                class="players-section">
-            <h4 class="section-title">👥 Players</h4>
-            <div class="players-list">
-              <div *ngFor="let player of getPlayersForDate(dateOption.id)" class="player-item">
+            <div class="players-header">
+              <h4 class="section-title">👥 Players ({{ getPlayersForDate(dateOption.id).length }})</h4>
+              <button mat-icon-button [matMenuTriggerFor]="viewMenu" class="view-toggle-btn">
+                <mat-icon>{{ isCompactView ? 'view_list' : 'view_module' }}</mat-icon>
+              </button>
+              <mat-menu #viewMenu="matMenu">
+                <button mat-menu-item (click)="isCompactView = true">
+                  <mat-icon>view_module</mat-icon>
+                  <span>Compact View</span>
+                </button>
+                <button mat-menu-item (click)="isCompactView = false">
+                  <mat-icon>view_list</mat-icon>
+                  <span>Detailed View</span>
+                </button>
+              </mat-menu>
+            </div>
+            
+            <!-- Compact View -->
+            <div *ngIf="isCompactView" class="players-list compact">
+              <div *ngFor="let player of getPlayersForDate(dateOption.id); let i = index" class="player-item compact">
+                <span class="player-number">{{ i + 1 }}</span>
+                <span class="player-name">{{ player.name }}</span>
+                <span class="player-seed">#{{ player.seed }}</span>
+              </div>
+            </div>
+            
+            <!-- Detailed View (Original) -->
+            <div *ngIf="!isCompactView" class="players-list detailed">
+              <div *ngFor="let player of getPlayersForDate(dateOption.id)" class="player-item detailed">
                 <span class="seed">#{{ player.seed }}</span>
                 <span class="name">{{ player.name }}</span>
               </div>
             </div>
             
             <div *ngIf="hasEnoughPlayers(dateOption.id)" class="teams-pending">
-              <span class="pending-message">⏳ Waiting for admin to generate teams</span>
+              <span *ngIf="!teamsRecentlyCleared" class="pending-message">⏳ Waiting for admin to generate teams</span>
+              <span *ngIf="teamsRecentlyCleared" class="teams-cleared-message">
+                🔄 Teams were cleared due to recent vote changes - admin will regenerate teams
+              </span>
             </div>
             <div *ngIf="!hasEnoughPlayers(dateOption.id)" class="insufficient-players">
               <span class="insufficient-message">
@@ -130,8 +223,9 @@
     <p>Loading teams and matches...</p>
   </div>
 
-  <div *ngIf="error" class="error">
-    <mat-icon>error</mat-icon>
-    <span>{{ error }}</span>
+    <div *ngIf="error" class="error">
+      <mat-icon>error</mat-icon>
+      <span>{{ error }}</span>
+    </div>
   </div>
 </div>

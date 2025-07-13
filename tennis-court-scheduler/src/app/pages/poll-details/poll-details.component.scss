@@ -174,6 +174,24 @@ h2 {
       .mat-mdc-select-arrow {
         color: var(--color-accent);
       }
+      
+      // Autocomplete input styling
+      input[matInput] {
+        color: var(--color-text) !important;
+        font-size: 16px !important;
+        
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.6) !important;
+        }
+      }
+      
+      .mat-mdc-form-field-label {
+        color: rgba(255, 255, 255, 0.6) !important;
+      }
+      
+      .mat-icon[matSuffix] {
+        color: var(--color-accent) !important;
+      }
     }
   }
 }
@@ -235,9 +253,30 @@ h2 {
   }
 }
 
-// Dark theme support for dropdown
-::ng-deep .mat-mdc-select-panel {
+// Dark theme support for dropdown and autocomplete
+::ng-deep .mat-mdc-select-panel,
+::ng-deep .custom-autocomplete-panel {
   background-color: #fff !important;
+}
+
+// Autocomplete specific styling
+::ng-deep .custom-autocomplete-panel {
+  max-height: 300px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+  
+  .mat-mdc-option {
+    padding: 12px 16px !important;
+    min-height: 60px !important;
+    
+    &:hover {
+      background-color: #f5f5f5 !important;
+    }
+    
+    &.mat-mdc-option-active {
+      background-color: #e3f2fd !important;
+    }
+  }
 }
 
 .vote-button {

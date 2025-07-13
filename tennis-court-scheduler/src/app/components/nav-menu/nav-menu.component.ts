@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -54,13 +54,37 @@ export class NavMenuComponent {
       icon: 'sports_tennis',
       description: 'View team assignments',
       adminOnly: false
+    },
+    {
+      label: 'Activity Logs',
+      route: '/activity-logs',
+      icon: 'history',
+      description: 'Monitor user activity and page access',
+      adminOnly: true,
+      roelSundiamOnly: true
+    },
+    {
+      label: 'Admin Panel',
+      route: '/admin-panel',
+      icon: 'admin_panel_settings',
+      description: 'Manage coin system and club settings',
+      adminOnly: true,
+      roelSundiamOnly: true
     }
   ];
 
   user: User | null = null;
 
-  constructor(public auth: AuthService, private router: Router) {
-    this.auth.user$.subscribe(user => this.user = user);
+  constructor(
+    public auth: AuthService, 
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {
+    this.auth.user$.subscribe(user => {
+      this.user = user;
+      // Use markForCheck instead of detectChanges to avoid assertion error
+      this.cdr.markForCheck();
+    });
   }
 
   onLogin() {
@@ -71,6 +95,29 @@ export class NavMenuComponent {
   onLogout() {
     this.auth.logout();
     this.closeSidenav();
+  }
+
+  // Check if menu item should be visible
+  isMenuItemVisible(item: any): boolean {
+    const currentUser = this.auth.getUser();
+
+    // If item is not admin-only, show to everyone
+    if (!item.adminOnly) {
+      return true;
+    }
+
+    // If user is not admin, don't show admin-only items
+    if (!this.auth.isAdmin()) {
+      return false;
+    }
+
+    // If item is RoelSundiam-only, check specific username
+    if (item.roelSundiamOnly) {
+      return currentUser?.username === 'RoelSundiam';
+    }
+
+    // Regular admin item, show to all admins
+    return true;
   }
 
   openSidenav() {}

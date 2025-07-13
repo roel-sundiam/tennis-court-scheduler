@@ -20,12 +20,11 @@
         <div class="player-selector">
           <h4 class="selector-title">Select Player</h4>
           <mat-form-field appearance="outline" class="custom-select">
-            <mat-select [(ngModel)]="selectedPlayerId" (selectionChange)="onPlayerSelectionChange()" 
-                        placeholder="Choose a player...">
-              <mat-select-trigger>
-                <span *ngIf="selectedPlayerId">{{ getSelectedPlayerName() }}</span>
-              </mat-select-trigger>
-              <mat-option *ngFor="let player of players" [value]="player.id" class="custom-option">
+            <mat-label>Search or choose a player...</mat-label>
+            <input matInput [formControl]="playerControl" [matAutocomplete]="playerAuto" placeholder="Type player name...">
+            <mat-icon matSuffix>search</mat-icon>
+            <mat-autocomplete #playerAuto="matAutocomplete" [displayWith]="displayPlayerName" (optionSelected)="onPlayerSelected($event.option.value)" panelClass="custom-autocomplete-panel">
+              <mat-option *ngFor="let player of filteredPlayers | async" [value]="player" class="custom-option">
                 <div class="player-option">
                   <div class="player-avatar">{{ getPlayerInitials(player.name) }}</div>
                   <div class="player-info">
@@ -34,7 +33,7 @@
                   </div>
                 </div>
               </mat-option>
-            </mat-select>
+            </mat-autocomplete>
           </mat-form-field>
         </div>
 

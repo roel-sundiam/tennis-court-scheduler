@@ -8,28 +8,76 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
 import { AuthService } from '../../services/auth.service';
+import { CoinService } from '../../services/coin.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-players-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, DragDropModule, MatSnackBarModule, MatDialogModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, RouterModule, DragDropModule, MatSnackBarModule, MatDialogModule, MatButtonModule, MatIconModule, MatCardModule],
   templateUrl: './players-list.component.html',
   styleUrls: ['./players-list.component.scss']
 })
 export class PlayersListComponent implements OnInit {
   players: Player[] = [];
   saving = false;
+  
+  // Coin system
+  hasAccess = false;
+  coinBalance = 0;
+  pageCost = 3;
 
   constructor(
     private playersService: PlayersService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
-    public auth: AuthService
+    public auth: AuthService,
+    public coinService: CoinService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.loadPlayers();
+    this.initializeCoinSystem();
+  }
+
+  initializeCoinSystem() {
+    // Subscribe to balance changes
+    this.coinService.balance$.subscribe(balance => {
+      this.coinBalance = balance;
+    });
+
+    // Check if user can access the page
+    this.checkPageAccess();
+  }
+
+  checkPageAccess() {
+    if (this.coinService.canAfford('PLAYERS_VIEW')) {
+      this.purchasePageAccess();
+    } else {
+      this.showInsufficientCoinsMessage();
+    }
+  }
+
+  purchasePageAccess() {
+    this.coinService.useCoins('PLAYERS_VIEW', 'Players management page access').subscribe({
+      next: (success) => {
+        if (success) {
+          this.hasAccess = true;
+          this.loadPlayers();
+          if (!this.coinService.hasUnlimitedAccess()) {
+            this.showSuccessMessage(`Players access granted! (${this.pageCost} coins used)`);
+          }
+        } else {
+          this.showInsufficientCoinsMessage();
+        }
+      },
+      error: (error) => {
+        console.error('Failed to purchase players access:', error);
+        this.showErrorMessage('Failed to process payment. Please try again.');
+      }
+    });
   }
 
   loadPlayers(): void {
@@ -40,6 +88,12 @@ export class PlayersListComponent implements OnInit {
 
   deletePlayer(id: string): void {
     if (this.saving) return;
+    
+    // Check if user can afford delete action
+    if (!this.coinService.canAfford('PLAYER_DELETE')) {
+      this.showInsufficientCoinsMessage('delete player');
+      return;
+    }
     
     const player = this.players.find(p => p.id === id);
     if (!player) return;
@@ -52,9 +106,25 @@ export class PlayersListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
-        this.playersService.deletePlayer(id).subscribe(() => {
-          this.loadPlayers();
-          this.snackBar.open(`${player.name} has been deleted`, 'Close', { duration: 3000 });
+        // Charge coins for delete action
+        this.coinService.useCoins('PLAYER_DELETE', `Delete player: ${player.name}`).subscribe({
+          next: (success) => {
+            if (success) {
+              this.playersService.deletePlayer(id).subscribe(() => {
+                this.loadPlayers();
+                const message = this.coinService.hasUnlimitedAccess() 
+                  ? `${player.name} has been deleted`
+                  : `${player.name} has been deleted (1 coin used)`;
+                this.snackBar.open(message, 'Close', { duration: 3000 });
+              });
+            } else {
+              this.showInsufficientCoinsMessage('delete player');
+            }
+          },
+          error: (error) => {
+            console.error('Failed to charge for delete:', error);
+            this.showErrorMessage('Failed to process payment for delete.');
+          }
         });
       }
     });
@@ -100,6 +170,42 @@ export class PlayersListComponent implements OnInit {
         }
       });
     }
+  }
+
+  private showSuccessMessage(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: ['success-snackbar']
+    });
+  }
+
+  private showErrorMessage(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      panelClass: ['error-snackbar']
+    });
+  }
+
+  private showInsufficientCoinsMessage(action: string = 'access players') {
+    const cost = action === 'delete player' ? this.coinService.getFeatureCost('PLAYER_DELETE') : this.pageCost;
+    const message = `Insufficient coins to ${action}. Need ${cost} coin${cost > 1 ? 's' : ''}.`;
+    this.snackBar.open(message, 'Purchase Coins', {
+      duration: 8000,
+      panelClass: ['warning-snackbar']
+    }).onAction().subscribe(() => {
+      this.openPurchaseModal();
+    });
+  }
+
+  openPurchaseModal() {
+    import('../../components/purchase-modal/purchase-modal.component').then(module => {
+      this.dialog.open(module.PurchaseModalComponent, {
+        width: '900px',
+        maxWidth: '95vw',
+        maxHeight: '90vh',
+        data: { currentBalance: this.coinBalance }
+      });
+    });
   }
 }
 

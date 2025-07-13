@@ -6,6 +6,39 @@
 </mat-toolbar>
 
 <div class="container">
+  <!-- Access Denied State -->
+  <div *ngIf="!hasAccess" class="access-denied">
+    <mat-card class="premium-card">
+      <mat-card-header>
+        <mat-icon class="premium-icon">analytics</mat-icon>
+        <mat-card-title>Premium Feature</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Access to Poll Results & Team Generation requires {{ pageCost }} coin{{ pageCost > 1 ? 's' : '' }}.</p>
+        <p *ngIf="!coinService.hasUnlimitedAccess()">
+          Current balance: {{ coinBalance }} coin{{ coinBalance === 1 ? '' : 's' }}
+        </p>
+        <div class="access-actions">
+          <button mat-raised-button 
+                  color="accent" 
+                  (click)="checkPageAccess()"
+                  [disabled]="!coinService.canAfford('POLL_RESULTS_VIEW')">
+            <mat-icon>payment</mat-icon>
+            Purchase Access ({{ pageCost }} 🪙)
+          </button>
+          <button mat-stroked-button 
+                  (click)="openPurchaseModal()"
+                  *ngIf="!coinService.canAfford('POLL_RESULTS_VIEW')">
+            <mat-icon>shopping_cart</mat-icon>
+            Buy More Coins
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Main Content (Accessible) -->
+  <div *ngIf="hasAccess">
   <div *ngIf="poll" class="poll-content">
     <div class="poll-header">
       <h1>{{ poll.title }} Results</h1>
@@ -23,9 +56,35 @@
           
           <!-- Voters List -->
           <div *ngIf="getPlayersForDate(dateOption.id).length > 0" class="voters-section">
-            <h4>Players:</h4>
-            <div class="voters-list">
-              <div *ngFor="let player of getPlayersForDate(dateOption.id)" class="voter-item">
+            <div class="players-header">
+              <h4>Players ({{ getPlayersForDate(dateOption.id).length }}):</h4>
+              <button mat-icon-button [matMenuTriggerFor]="viewMenu" class="view-toggle-btn">
+                <mat-icon>{{ isCompactView ? 'view_list' : 'view_module' }}</mat-icon>
+              </button>
+              <mat-menu #viewMenu="matMenu">
+                <button mat-menu-item (click)="isCompactView = true">
+                  <mat-icon>view_module</mat-icon>
+                  <span>Compact View</span>
+                </button>
+                <button mat-menu-item (click)="isCompactView = false">
+                  <mat-icon>view_list</mat-icon>
+                  <span>Detailed View</span>
+                </button>
+              </mat-menu>
+            </div>
+            
+            <!-- Compact View -->
+            <div *ngIf="isCompactView" class="voters-list compact">
+              <div *ngFor="let player of getPlayersForDate(dateOption.id); let i = index" class="voter-item compact">
+                <span class="player-number">{{ i + 1 }}</span>
+                <span class="player-name">{{ player.name }}</span>
+                <span class="player-seed">#{{ player.seed }}</span>
+              </div>
+            </div>
+            
+            <!-- Detailed View (Original) -->
+            <div *ngIf="!isCompactView" class="voters-list detailed">
+              <div *ngFor="let player of getPlayersForDate(dateOption.id)" class="voter-item detailed">
                 <span>{{ player.name }}</span>
               </div>
             </div>
@@ -54,20 +113,134 @@
               
               <button mat-raised-button color="primary" 
                       (click)="generateTeams(dateOption.id)"
-                      [disabled]="!selectedAlgorithms[dateOption.id]">
+                      [disabled]="!selectedAlgorithms[dateOption.id] || !coinService.canAfford('TEAM_GENERATION')"
+                      [matTooltip]="coinService.canAfford('TEAM_GENERATION') ? 'Generate teams (4 coins)' : 'Insufficient coins to generate teams'">
                 {{ hasGeneratedMatches(dateOption.id) ? 'Regenerate Teams' : 'Generate Teams' }}
+                <span class="coin-cost" *ngIf="!coinService.hasUnlimitedAccess()">
+                  (4 🪙)
+                </span>
               </button>
+            </div>
+
+            <!-- Manual Pairing Interface -->
+            <div *ngIf="isManualPairingMode(dateOption.id)" class="manual-pairing-interface">
+              <div class="manual-pairing-header">
+                <h5>Manual Team Pairing</h5>
+                <p>Select two players to create a team. Click on players to select them.</p>
+              </div>
+
+              <!-- Selected Players for Next Team -->
+              <div *ngIf="getManualPairingState(dateOption.id)?.selectedPlayers && getManualPairingState(dateOption.id)!.selectedPlayers.length > 0" class="selected-players">
+                <h6>Selected for Next Team ({{ getManualPairingState(dateOption.id)!.selectedPlayers.length }}/2):</h6>
+                <div class="selected-players-list">
+                  <mat-chip-listbox>
+                    <mat-chip-option *ngFor="let player of getManualPairingState(dateOption.id)?.selectedPlayers"
+                                   selected="true">
+                      <span class="seed">#{{ player.seed }}</span>
+                      <span class="name">{{ player.name }}</span>
+                      <mat-icon matChipRemove (click)="unselectPlayer(dateOption.id, player)">cancel</mat-icon>
+                    </mat-chip-option>
+                  </mat-chip-listbox>
+                </div>
+              </div>
+
+              <!-- Available Players -->
+              <div class="available-players">
+                <h6>Available Players:</h6>
+                <div class="players-grid">
+                  <div *ngFor="let player of getManualPairingState(dateOption.id)?.availablePlayers" 
+                       class="player-card clickable"
+                       (click)="selectPlayerForTeam(dateOption.id, player)">
+                    <span class="seed">#{{ player.seed }}</span>
+                    <span class="name">{{ player.name }}</span>
+                    <button mat-icon-button 
+                            (click)="$event.stopPropagation(); moveToReserve(dateOption.id, player)"
+                            matTooltip="Move to reserves">
+                      <mat-icon>person_remove</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Created Teams -->
+              <div *ngIf="getManualPairingState(dateOption.id)?.teams && getManualPairingState(dateOption.id)!.teams.length > 0" class="created-teams">
+                <h6>Created Teams:</h6>
+                <div *ngFor="let team of getManualPairingState(dateOption.id)?.teams" class="team-preview">
+                  <div class="team-info">
+                    <span class="team-name">{{ team.id }}</span>
+                    <div class="team-players">
+                      <span class="player">
+                        <span class="seed">#{{ team.player1.seed }}</span>
+                        <span class="name">{{ team.player1.name }}</span>
+                      </span>
+                      <span class="plus">+</span>
+                      <span class="player">
+                        <span class="seed">#{{ team.player2.seed }}</span>
+                        <span class="name">{{ team.player2.name }}</span>
+                      </span>
+                    </div>
+                    <span class="avg-seed">Avg: {{ team.averageSeed | number:'1.1-1' }}</span>
+                  </div>
+                  <button mat-icon-button 
+                          (click)="removeTeam(dateOption.id, team.id)"
+                          matTooltip="Remove team">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Reserve Players -->
+              <div *ngIf="getManualPairingState(dateOption.id)?.reservePlayers && getManualPairingState(dateOption.id)!.reservePlayers.length > 0" class="reserve-players-manual">
+                <h6>Reserve Players:</h6>
+                <div class="reserve-list">
+                  <mat-chip-listbox>
+                    <mat-chip-option *ngFor="let player of getManualPairingState(dateOption.id)?.reservePlayers"
+                                   (click)="moveFromReserve(dateOption.id, player)">
+                      <span class="seed">#{{ player.seed }}</span>
+                      <span class="name">{{ player.name }}</span>
+                    </mat-chip-option>
+                  </mat-chip-listbox>
+                </div>
+              </div>
+
+              <!-- Manual Pairing Actions -->
+              <div class="manual-pairing-actions">
+                <button mat-raised-button color="primary" 
+                        (click)="finalizeManualPairing(dateOption.id)"
+                        [disabled]="!getManualPairingState(dateOption.id)?.teams || getManualPairingState(dateOption.id)!.teams.length === 0">
+                  Finalize Teams
+                </button>
+                <button mat-button 
+                        (click)="cancelManualPairing(dateOption.id)">
+                  Cancel
+                </button>
+              </div>
             </div>
 
             <!-- Generated Teams Display -->
             <div *ngIf="hasGeneratedMatches(dateOption.id)" class="generated-teams">
               <div class="teams-header">
                 <h5>Generated Teams ({{ getGeneratedMatches(dateOption.id)?.algorithm }})</h5>
+                <div class="teams-actions">
+                  <button mat-raised-button color="warn" 
+                          (click)="clearAllMatches(dateOption.id)"
+                          matTooltip="Clear all matches for this date">
+                    <mat-icon>clear_all</mat-icon>
+                    Clear All
+                  </button>
+                </div>
               </div>
               
               <!-- Matches -->
               <div *ngFor="let match of getGeneratedMatches(dateOption.id)?.matches" class="match-card">
-                <h6>Match {{ match.id.split('-')[1] }}</h6>
+                <div class="match-header">
+                  <h6>Match {{ match.id.split('-')[1] }}</h6>
+                  <button mat-icon-button color="warn" 
+                          (click)="removeMatch(dateOption.id, match.id)"
+                          matTooltip="Remove this match">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
                 <div class="teams-vs">
                   <!-- Team A -->
                   <div class="team">
@@ -125,11 +298,12 @@
     </mat-card>
   </div>
 
-  <div *ngIf="loading" class="loading">
-    <mat-spinner></mat-spinner>
-  </div>
+    <div *ngIf="loading" class="loading">
+      <mat-spinner></mat-spinner>
+    </div>
 
-  <div *ngIf="error" class="error">
-    {{ error }}
+    <div *ngIf="error" class="error">
+      {{ error }}
+    </div>
   </div>
 </div>

@@ -9,11 +9,20 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatListModule } from '@angular/material/list';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
 import { FormsModule } from '@angular/forms';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { Poll, DateOption, Vote } from '../../models/poll.model';
 import { PollService } from '../../services/poll.service';
 import { PlayersService } from '../../mock-data/players.service';
 import { Player } from '../../mock-data/mock-players';
+import { CoinService } from '../../services/coin.service';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 
 // Team generation interfaces
 interface Team {
@@ -37,6 +46,13 @@ interface GeneratedMatches {
   reservePlayers: Player[];
 }
 
+interface ManualPairingState {
+  availablePlayers: Player[];
+  selectedPlayers: Player[];
+  teams: Team[];
+  reservePlayers: Player[];
+}
+
 @Component({
   selector: 'app-poll-results',
   standalone: true,
@@ -49,7 +65,13 @@ interface GeneratedMatches {
     MatIconModule,
     MatButtonModule,
     MatDividerModule,
-    FormsModule
+    MatChipsModule,
+    MatListModule,
+    MatTooltipModule,
+    MatDialogModule,
+    MatMenuModule,
+    FormsModule,
+    MatSnackBarModule
   ],
   templateUrl: './poll-results.component.html',
   styleUrls: ['./poll-results.component.scss'],
@@ -65,20 +87,78 @@ export class PollResultsComponent implements OnInit {
   generatedMatches: { [dateId: string]: GeneratedMatches } = {};
   selectedAlgorithms: { [dateId: string]: string } = {};
   
+  // Manual pairing properties
+  manualPairingStates: { [dateId: string]: ManualPairingState } = {};
+  
+  // View toggle property
+  isCompactView = true;
+  
+  // Coin system
+  hasAccess = false;
+  coinBalance = 0;
+  pageCost = 5;
+  
   algorithmOptions = [
     { value: 'random', label: 'Random' },
     { value: 'balanced', label: 'Balanced (Top vs Bottom)' },
-    { value: 'grouped', label: 'Skill-Level Groups' }
+    { value: 'grouped', label: 'Skill-Level Groups' },
+    { value: 'manual', label: 'Manual Pairing' }
   ];
 
   constructor(
     private route: ActivatedRoute,
     private pollService: PollService,
     private playersService: PlayersService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog,
+    public coinService: CoinService,
+    private snackBar: MatSnackBar,
+    private router: Router
   ) {}
 
   ngOnInit() {
+    this.initializeCoinSystem();
+  }
+
+  initializeCoinSystem() {
+    // Subscribe to balance changes
+    this.coinService.balance$.subscribe(balance => {
+      this.coinBalance = balance;
+    });
+
+    // Check if user can access the page
+    this.checkPageAccess();
+  }
+
+  checkPageAccess() {
+    if (this.coinService.canAfford('POLL_RESULTS_VIEW')) {
+      this.purchasePageAccess();
+    } else {
+      this.showInsufficientCoinsMessage();
+    }
+  }
+
+  purchasePageAccess() {
+    this.coinService.useCoins('POLL_RESULTS_VIEW', 'Poll Results page access').subscribe({
+      next: (success) => {
+        if (success) {
+          this.hasAccess = true;
+          this.loadAllData();
+          if (!this.coinService.hasUnlimitedAccess()) {
+            this.showSuccessMessage(`Poll Results access granted! (${this.pageCost} coins used)`);
+          }
+        } else {
+          this.showInsufficientCoinsMessage();
+        }
+      },
+      error: (error) => {
+        console.error('Failed to purchase poll results access:', error);
+        this.showErrorMessage('Failed to process payment. Please try again.');
+      }
+    });
+  }
+
+  loadAllData() {
     this.loadPollResults();
     this.loadPlayers();
     this.loadGeneratedTeams();
@@ -192,11 +272,39 @@ export class PollResultsComponent implements OnInit {
 
   // Generate teams based on selected algorithm
   generateTeams(dateId: string) {
+    // Check if user can afford team generation
+    if (!this.coinService.canAfford('TEAM_GENERATION')) {
+      this.showInsufficientCoinsMessage('generate teams');
+      return;
+    }
+
     const algorithm = this.selectedAlgorithms[dateId];
     if (!algorithm) return;
 
     const players = this.getPlayersForDate(dateId);
     if (players.length < 2) return;
+
+    // Charge coins for team generation
+    this.coinService.useCoins('TEAM_GENERATION', `Generate teams for ${dateId} using ${algorithm} algorithm`).subscribe({
+      next: (success) => {
+        if (success) {
+          this.executeTeamGeneration(dateId, algorithm, players);
+          if (!this.coinService.hasUnlimitedAccess()) {
+            const cost = this.coinService.getFeatureCost('TEAM_GENERATION');
+            this.showSuccessMessage(`Teams generated! (${cost} coins used)`);
+          }
+        } else {
+          this.showInsufficientCoinsMessage('generate teams');
+        }
+      },
+      error: (error) => {
+        console.error('Failed to charge for team generation:', error);
+        this.showErrorMessage('Failed to process payment for team generation.');
+      }
+    });
+  }
+
+  private executeTeamGeneration(dateId: string, algorithm: string, players: Player[]) {
 
     let teams: Team[] = [];
     let reservePlayers: Player[] = [];
@@ -211,6 +319,9 @@ export class PollResultsComponent implements OnInit {
       case 'grouped':
         ({ teams, reservePlayers } = this.generateGroupedTeams(players));
         break;
+      case 'manual':
+        this.initializeManualPairing(dateId, players);
+        return; // Don't create matches yet for manual pairing
     }
 
     const matches = this.createMatches(teams);
@@ -348,5 +459,249 @@ export class PollResultsComponent implements OnInit {
 
   getGeneratedMatches(dateId: string): GeneratedMatches | undefined {
     return this.generatedMatches[dateId];
+  }
+
+  // Manual pairing methods
+  initializeManualPairing(dateId: string, players: Player[]) {
+    this.manualPairingStates[dateId] = {
+      availablePlayers: [...players],
+      selectedPlayers: [],
+      teams: [],
+      reservePlayers: []
+    };
+  }
+
+  getManualPairingState(dateId: string): ManualPairingState | undefined {
+    return this.manualPairingStates[dateId];
+  }
+
+  isManualPairingMode(dateId: string): boolean {
+    return this.selectedAlgorithms[dateId] === 'manual' && !!this.manualPairingStates[dateId];
+  }
+
+  selectPlayerForTeam(dateId: string, player: Player) {
+    const state = this.manualPairingStates[dateId];
+    if (!state) return;
+
+    // Move player from available to selected
+    state.availablePlayers = state.availablePlayers.filter(p => p.id !== player.id);
+    state.selectedPlayers.push(player);
+
+    // If we have 2 selected players, create a team
+    if (state.selectedPlayers.length === 2) {
+      this.createManualTeam(dateId);
+    }
+  }
+
+  unselectPlayer(dateId: string, player: Player) {
+    const state = this.manualPairingStates[dateId];
+    if (!state) return;
+
+    // Move player from selected back to available
+    state.selectedPlayers = state.selectedPlayers.filter(p => p.id !== player.id);
+    state.availablePlayers.push(player);
+    // Sort by seed to maintain order
+    state.availablePlayers.sort((a, b) => a.seed - b.seed);
+  }
+
+  createManualTeam(dateId: string) {
+    const state = this.manualPairingStates[dateId];
+    if (!state || state.selectedPlayers.length !== 2) return;
+
+    const [player1, player2] = state.selectedPlayers;
+    const team = this.createTeam(player1, player2, state.teams.length + 1);
+    
+    state.teams.push(team);
+    state.selectedPlayers = [];
+  }
+
+  removeTeam(dateId: string, teamId: string) {
+    const state = this.manualPairingStates[dateId];
+    if (!state) return;
+
+    const teamIndex = state.teams.findIndex(t => t.id === teamId);
+    if (teamIndex === -1) return;
+
+    const team = state.teams[teamIndex];
+    
+    // Move players back to available
+    state.availablePlayers.push(team.player1, team.player2);
+    state.availablePlayers.sort((a, b) => a.seed - b.seed);
+    
+    // Remove team
+    state.teams.splice(teamIndex, 1);
+    
+    // Renumber remaining teams
+    state.teams.forEach((team, index) => {
+      team.id = `team-${index + 1}`;
+    });
+  }
+
+  moveToReserve(dateId: string, player: Player) {
+    const state = this.manualPairingStates[dateId];
+    if (!state) return;
+
+    // Remove from available and add to reserves
+    state.availablePlayers = state.availablePlayers.filter(p => p.id !== player.id);
+    state.reservePlayers.push(player);
+  }
+
+  moveFromReserve(dateId: string, player: Player) {
+    const state = this.manualPairingStates[dateId];
+    if (!state) return;
+
+    // Remove from reserves and add to available
+    state.reservePlayers = state.reservePlayers.filter(p => p.id !== player.id);
+    state.availablePlayers.push(player);
+    state.availablePlayers.sort((a, b) => a.seed - b.seed);
+  }
+
+  finalizeManualPairing(dateId: string) {
+    const state = this.manualPairingStates[dateId];
+    if (!state) return;
+
+    // Move any remaining available players to reserves
+    state.reservePlayers.push(...state.availablePlayers);
+    state.availablePlayers = [];
+
+    // Create matches from teams
+    const matches = this.createMatches(state.teams);
+
+    const generatedTeamsData = {
+      dateId,
+      algorithm: 'manual',
+      teams: state.teams,
+      matches,
+      reservePlayers: state.reservePlayers
+    };
+
+    this.generatedMatches[dateId] = generatedTeamsData;
+
+    // Clear manual pairing state
+    delete this.manualPairingStates[dateId];
+
+    // Save to backend
+    this.saveTeamsToBackend(generatedTeamsData);
+  }
+
+  cancelManualPairing(dateId: string) {
+    delete this.manualPairingStates[dateId];
+    this.selectedAlgorithms[dateId] = '';
+  }
+
+  // Match removal methods
+  removeMatch(dateId: string, matchId: string) {
+    const generatedData = this.generatedMatches[dateId];
+    if (!generatedData) return;
+
+    // Find the match to remove
+    const matchIndex = generatedData.matches.findIndex(m => m.id === matchId);
+    if (matchIndex === -1) return;
+
+    const match = generatedData.matches[matchIndex];
+    const matchNumber = match.id.split('-')[1];
+    
+    // Open confirmation dialog
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px'
+    });
+    
+    dialogRef.componentInstance.title = `Remove Match ${matchNumber}`;
+    dialogRef.componentInstance.message = `Are you sure you want to remove Match ${matchNumber}? The 4 players will be moved to reserves.`;
+    dialogRef.componentInstance.confirmText = 'Remove Match';
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Move players from the match back to reserves
+        generatedData.reservePlayers.push(
+          match.teamA.player1,
+          match.teamA.player2,
+          match.teamB.player1,
+          match.teamB.player2
+        );
+
+        // Remove the match
+        generatedData.matches.splice(matchIndex, 1);
+
+        // Remove the teams from the teams array
+        generatedData.teams = generatedData.teams.filter(
+          team => team.id !== match.teamA.id && team.id !== match.teamB.id
+        );
+
+        // Renumber remaining matches
+        generatedData.matches.forEach((match, index) => {
+          match.id = `match-${index + 1}`;
+        });
+
+        // Save updated data to backend
+        this.saveTeamsToBackend(generatedData);
+      }
+    });
+  }
+
+  clearAllMatches(dateId: string) {
+    const generatedData = this.generatedMatches[dateId];
+    if (!generatedData) return;
+
+    // Open confirmation dialog
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px'
+    });
+    
+    dialogRef.componentInstance.title = 'Clear All Matches';
+    dialogRef.componentInstance.message = 'Are you sure you want to clear all matches for this date? All players will be moved to reserves. This action cannot be undone.';
+    dialogRef.componentInstance.confirmText = 'Clear All';
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Move all players to reserves
+        generatedData.teams.forEach(team => {
+          generatedData.reservePlayers.push(team.player1, team.player2);
+        });
+
+        // Clear teams and matches
+        generatedData.teams = [];
+        generatedData.matches = [];
+
+        // Save updated data to backend
+        this.saveTeamsToBackend(generatedData);
+      }
+    });
+  }
+
+  private showSuccessMessage(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: ['success-snackbar']
+    });
+  }
+
+  private showErrorMessage(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      panelClass: ['error-snackbar']
+    });
+  }
+
+  private showInsufficientCoinsMessage(action: string = 'access poll results') {
+    const cost = action === 'generate teams' ? this.coinService.getFeatureCost('TEAM_GENERATION') : this.pageCost;
+    const message = `Insufficient coins to ${action}. Need ${cost} coin${cost > 1 ? 's' : ''}.`;
+    this.snackBar.open(message, 'Purchase Coins', {
+      duration: 8000,
+      panelClass: ['warning-snackbar']
+    }).onAction().subscribe(() => {
+      this.openPurchaseModal();
+    });
+  }
+
+  openPurchaseModal() {
+    import('../../components/purchase-modal/purchase-modal.component').then(module => {
+      this.dialog.open(module.PurchaseModalComponent, {
+        width: '900px',
+        maxWidth: '95vw',
+        maxHeight: '90vh',
+        data: { currentBalance: this.coinBalance }
+      });
+    });
   }
 }

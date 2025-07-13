@@ -1,0 +1,181 @@
+// Footer Component - Dark Theme Styling
+:host {
+  --primary-color: #bb86fc;
+  --primary-variant: #3700b3;
+  --secondary-color: #03dac6;
+  --surface-color: rgba(255, 255, 255, 0.05);
+  --surface-elevated: rgba(255, 255, 255, 0.12);
+  --text-primary: rgba(255, 255, 255, 0.87);
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-disabled: rgba(255, 255, 255, 0.38);
+  --border-color: rgba(255, 255, 255, 0.12);
+}
+
+.app-footer {
+  background: var(--surface-color);
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+  padding: 40px 0 20px 0;
+  
+  .footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 40px;
+    
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 30px;
+      text-align: center;
+    }
+  }
+  
+  .footer-section {
+    h4 {
+      color: var(--primary-color);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0 0 20px 0;
+      
+      @media (max-width: 768px) {
+        margin-bottom: 15px;
+      }
+    }
+  }
+  
+  .app-info {
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      
+      @media (max-width: 768px) {
+        justify-content: center;
+      }
+      
+      .logo-image {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        object-fit: cover;
+        border: 2px solid var(--primary-color);
+      }
+      
+      .logo-icon {
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+        color: var(--primary-color);
+      }
+      
+      .app-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+    }
+    
+    .app-description {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin: 0;
+      max-width: 300px;
+      
+      @media (max-width: 768px) {
+        max-width: none;
+      }
+    }
+  }
+  
+  .footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    
+    .footer-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+      padding: 4px 0;
+      
+      @media (max-width: 768px) {
+        justify-content: center;
+      }
+      
+      &:hover {
+        color: var(--primary-color);
+      }
+      
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+      
+      span {
+        font-size: 0.9rem;
+      }
+    }
+  }
+  
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 20px 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 15px;
+      text-align: center;
+    }
+    
+    .copyright {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    
+    .tech-stack {
+      display: flex;
+      gap: 20px;
+      
+      @media (max-width: 768px) {
+        gap: 15px;
+      }
+      
+      .tech-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-disabled);
+        font-size: 0.8rem;
+        
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+          color: var(--primary-color);
+        }
+      }
+    }
+  }
+}
+
+// Dark theme overrides
+::ng-deep {
+  .app-footer {
+    .mat-divider {
+      border-top-color: var(--border-color) !important;
+      margin: 30px 0 20px 0;
+    }
+  }
+}

@@ -47,6 +47,10 @@ export class PollService {
 
   submitVotes(pollId: string, playerId: string, playerName: string, optionIds: string[]): Observable<Poll> {
     const voteData = { playerId, playerName, optionIds };
+    console.log('🚀 PollService submitVotes called:');
+    console.log('- URL:', `${this.apiUrl}/${pollId}/vote`);
+    console.log('- Vote Data:', voteData);
+    console.log('- Option IDs type:', typeof optionIds, 'length:', optionIds.length);
     return this.http.post<Poll>(`${this.apiUrl}/${pollId}/vote`, voteData);
   }
 
@@ -74,5 +78,10 @@ export class PollService {
   // Get generated teams from backend
   getGeneratedTeams(pollId: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${pollId}/teams`);
+  }
+
+  // Clear generated teams when votes change
+  clearGeneratedTeams(pollId: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${pollId}/teams`);
   }
 }

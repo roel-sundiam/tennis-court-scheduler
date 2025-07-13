@@ -20,9 +20,18 @@
               <span>Automatic team generation</span>
             </div>
           </div>
-          <button mat-raised-button color="accent" class="vote-now-btn" (click)="goToVote()" *ngIf="polls && polls.length > 0">
+          <button mat-raised-button 
+                  color="accent" 
+                  class="vote-now-btn" 
+                  (click)="goToVote()" 
+                  *ngIf="polls && polls.length > 0"
+                  [disabled]="!coinService.canAfford('VOTE_SUBMISSION')"
+                  [matTooltip]="coinService.canAfford('VOTE_SUBMISSION') ? 'Start voting (1 coin)' : 'Insufficient coins to vote'">
             <mat-icon>how_to_vote</mat-icon>
             Vote Now
+            <span class="coin-cost" *ngIf="!coinService.hasUnlimitedAccess()">
+              (1 🪙)
+            </span>
           </button>
         </div>
       </mat-card-content>

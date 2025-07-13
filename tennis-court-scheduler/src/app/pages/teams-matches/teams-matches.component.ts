@@ -4,10 +4,17 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Poll, Vote } from '../../models/poll.model';
 import { PollService } from '../../services/poll.service';
 import { PlayersService } from '../../mock-data/players.service';
 import { Player } from '../../mock-data/mock-players';
+import { CoinService } from '../../services/coin.service';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 // Interfaces for generated teams data
 interface Team {
@@ -40,7 +47,11 @@ interface GeneratedTeams {
     MatCardModule,
     MatProgressSpinnerModule,
     MatToolbarModule,
-    MatIconModule
+    MatIconModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatSnackBarModule,
+    MatDialogModule
   ],
   templateUrl: './teams-matches.component.html',
   styleUrls: ['./teams-matches.component.scss']
@@ -51,14 +62,70 @@ export class TeamsMatchesComponent implements OnInit {
   generatedTeams: GeneratedTeams[] = [];
   loading = false;
   error = '';
+  teamsRecentlyCleared = false;
+  
+  // View toggle property
+  isCompactView = true;
+
+  // Coin system
+  hasAccess = false;
+  coinBalance = 0;
+  pageCost = 2;
 
   constructor(
     private pollService: PollService,
-    private playersService: PlayersService
+    private playersService: PlayersService,
+    public coinService: CoinService,
+    private authService: AuthService,
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog,
+    private router: Router
   ) {}
 
   ngOnInit() {
-    this.loadData();
+    this.initializeCoinSystem();
+  }
+
+  initializeCoinSystem() {
+    // Subscribe to balance changes
+    this.coinService.balance$.subscribe(balance => {
+      this.coinBalance = balance;
+    });
+
+    // Check if user can access the page
+    this.checkPageAccess();
+  }
+
+  checkPageAccess() {
+    if (this.coinService.canAfford('TEAMS_MATCHES_VIEW')) {
+      this.purchasePageAccess();
+    } else {
+      this.showInsufficientCoinsMessage();
+    }
+  }
+
+  purchasePageAccess() {
+    this.coinService.useCoins('TEAMS_MATCHES_VIEW', 'Teams & Matches page access').subscribe({
+      next: (success) => {
+        if (success) {
+          this.hasAccess = true;
+          this.loadData();
+          // Auto-refresh teams data every 30 seconds to sync with vote changes
+          setInterval(() => {
+            this.loadGeneratedTeams();
+          }, 30000);
+          if (!this.coinService.hasUnlimitedAccess()) {
+            this.showSuccessMessage(`Teams & Matches access granted! (${this.pageCost} coins used)`);
+          }
+        } else {
+          this.showInsufficientCoinsMessage();
+        }
+      },
+      error: (error) => {
+        console.error('Failed to purchase teams access:', error);
+        this.showErrorMessage('Failed to process payment. Please try again.');
+      }
+    });
   }
 
   loadData() {
@@ -98,10 +165,25 @@ export class TeamsMatchesComponent implements OnInit {
 
   loadGeneratedTeams() {
     console.log('🔍 Loading generated teams from backend...');
+    const previousTeamsCount = this.generatedTeams.length;
+    
     this.pollService.getGeneratedTeams('1').subscribe({
       next: (response) => {
         console.log('📥 Backend response:', response);
-        this.generatedTeams = response.generatedTeams || [];
+        const newTeams = response.generatedTeams || [];
+        
+        // Check if teams were recently cleared (had teams before, now empty)
+        if (previousTeamsCount > 0 && newTeams.length === 0) {
+          this.teamsRecentlyCleared = true;
+          console.log('🔄 Teams were cleared due to vote changes');
+          
+          // Clear the flag after 10 seconds
+          setTimeout(() => {
+            this.teamsRecentlyCleared = false;
+          }, 10000);
+        }
+        
+        this.generatedTeams = newTeams;
         console.log('🎯 Generated teams loaded:', this.generatedTeams.length, 'entries');
         if (this.generatedTeams.length === 0) {
           console.log('✅ No generated teams found - database has been cleared!');
@@ -168,5 +250,46 @@ export class TeamsMatchesComponent implements OnInit {
       default:
         return algorithm;
     }
+  }
+
+  // Manual refresh method for user-triggered updates
+  refreshTeams() {
+    this.loadData();
+  }
+
+  private showSuccessMessage(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: ['success-snackbar']
+    });
+  }
+
+  private showErrorMessage(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      panelClass: ['error-snackbar']
+    });
+  }
+
+  private showInsufficientCoinsMessage() {
+    const cost = this.coinService.getFeatureCost('TEAMS_MATCHES_VIEW');
+    const message = `Insufficient coins for Teams & Matches access. Need ${cost} coin${cost > 1 ? 's' : ''}.`;
+    this.snackBar.open(message, 'Purchase Coins', {
+      duration: 8000,
+      panelClass: ['warning-snackbar']
+    }).onAction().subscribe(() => {
+      this.openPurchaseModal();
+    });
+  }
+
+  openPurchaseModal() {
+    import('../../components/purchase-modal/purchase-modal.component').then(module => {
+      this.dialog.open(module.PurchaseModalComponent, {
+        width: '900px',
+        maxWidth: '95vw',
+        maxHeight: '90vh',
+        data: { currentBalance: this.coinBalance }
+      });
+    });
   }
 }

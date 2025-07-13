@@ -15,6 +15,68 @@
   --shadow-color: rgba(0,0,0,0.4);
 }
 
+// Access Control Styles
+.access-denied {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 20px;
+  
+  .premium-card {
+    max-width: 500px;
+    text-align: center;
+    border: 2px solid #1e3c72;
+    background: var(--bg-card) !important;
+    
+    mat-card-header {
+      justify-content: center;
+      margin-bottom: 16px;
+      
+      .premium-icon {
+        color: #1e3c72;
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-right: 16px;
+      }
+      
+      .mat-mdc-card-title {
+        color: #1e3c72;
+        font-size: 24px;
+        font-weight: 600;
+      }
+    }
+    
+    mat-card-content {
+      p {
+        margin-bottom: 16px;
+        line-height: 1.6;
+        color: var(--text-secondary);
+      }
+      
+      .access-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 24px;
+        
+        button {
+          min-width: 160px;
+        }
+      }
+    }
+  }
+}
+
+// Coin cost styling
+.coin-cost {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-left: 8px;
+}
+
 // Reduce overall font size to 80%
 :host {
   font-size: 0.8rem;
@@ -159,27 +221,157 @@
   }
 }
 
+.players-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  
+  h4 {
+    margin: 0;
+    color: var(--tennis-orange);
+    font-weight: 600;
+  }
+  
+  .view-toggle-btn {
+    color: var(--tennis-orange);
+    
+    &:hover {
+      background: rgba(255, 152, 0, 0.1);
+    }
+  }
+}
+
 .voters-list {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   
-  .voter-item {
-    background: linear-gradient(135deg, var(--tennis-green) 0%, var(--tennis-green-light) 100%);
-    color: white;
-    border-radius: 20px;
-    padding: 8px 16px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
-    transition: transform 0.2s ease;
+  &.compact {
+    gap: 4px;
     
-    &:hover {
-      transform: translateY(-2px);
+    .voter-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      transition: all 0.2s ease;
+      min-width: 0;
+      
+      &:hover {
+        background: var(--tennis-green);
+        color: white;
+        border-color: var(--tennis-green);
+        transform: translateY(-1px);
+      }
+      
+      .player-number {
+        background: var(--tennis-orange);
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+      
+      .player-name {
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+      }
+      
+      .player-seed {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 2px 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
     }
+  }
+  
+  &.detailed {
+    gap: 8px;
     
-    span {
+    .voter-item {
+      background: linear-gradient(135deg, var(--tennis-green) 0%, var(--tennis-green-light) 100%);
       color: white;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+      transition: transform 0.2s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+      }
+      
+      span {
+        color: white;
+      }
+    }
+  }
+}
+
+// Mobile responsiveness for players
+@media (max-width: 768px) {
+  .players-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    
+    .view-toggle-btn {
+      align-self: flex-end;
+    }
+  }
+  
+  .voters-list.compact {
+    .voter-item {
+      min-width: calc(50% - 2px);
+      
+      .player-name {
+        font-size: 0.75rem;
+        max-width: 80px;
+      }
+      
+      .player-number {
+        width: 16px;
+        height: 16px;
+        font-size: 0.65rem;
+      }
+      
+      .player-seed {
+        font-size: 0.65rem;
+        padding: 1px 4px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .voters-list.compact {
+    .voter-item {
+      min-width: 100%;
+      justify-content: space-between;
+      
+      .player-name {
+        max-width: none;
+        flex: 1;
+      }
     }
   }
 }
@@ -359,7 +551,15 @@
 
 .teams-header {
   margin-bottom: 24px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
   
   h5 {
     color: var(--tennis-green-light);
@@ -369,12 +569,36 @@
     text-transform: capitalize;
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
     
     &::before {
       content: '🎯';
       font-size: 1.2rem;
+    }
+  }
+}
+
+.teams-actions {
+  display: flex;
+  gap: 8px;
+  
+  button {
+    background: linear-gradient(135deg, #f44336 0%, #e57373 100%) !important;
+    color: white !important;
+    border-radius: 20px !important;
+    font-weight: 600;
+    padding: 8px 16px !important;
+    box-shadow: 0 4px 16px rgba(244, 67, 54, 0.3);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+    }
+    
+    mat-icon {
+      margin-right: 4px;
+      font-size: 18px;
     }
   }
 }
@@ -397,7 +621,42 @@
     padding: 16px;
   }
   
-  h6 {
+  .match-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    
+    h6 {
+      color: var(--tennis-orange);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin: 0;
+      background: linear-gradient(135deg, var(--tennis-orange) 0%, var(--tennis-orange-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    button {
+      padding: 8px !important;
+      min-width: auto !important;
+      color: #f44336 !important;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: rgba(244, 67, 54, 0.1) !important;
+        transform: scale(1.1);
+      }
+      
+      mat-icon {
+        font-size: 20px;
+      }
+    }
+  }
+  
+  // Legacy support for existing h6 (in case there are other h6 elements)
+  h6:not(.match-header h6) {
     text-align: center;
     color: var(--tennis-orange);
     font-size: 1.2rem;
@@ -651,3 +910,400 @@
 }
 
 // Custom select styling is now handled above - no Material dropdown styling needed
+
+// Manual Pairing Interface Styles
+.manual-pairing-interface {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 20px;
+  box-shadow: 0 4px 16px var(--shadow-color);
+  border: 2px solid var(--tennis-orange);
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+.manual-pairing-header {
+  text-align: center;
+  margin-bottom: 24px;
+  
+  h5 {
+    color: var(--tennis-orange);
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    
+    &::before {
+      content: '🎯';
+      font-size: 1.2rem;
+    }
+  }
+  
+  p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}
+
+.selected-players {
+  margin-bottom: 24px;
+  
+  h6 {
+    color: var(--tennis-green-light);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    &::before {
+      content: '✅';
+      font-size: 1rem;
+    }
+  }
+}
+
+.selected-players-list {
+  mat-chip-listbox {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    
+    mat-chip-option {
+      background: linear-gradient(135deg, var(--tennis-green) 0%, var(--tennis-green-light) 100%) !important;
+      color: white !important;
+      border-radius: 20px !important;
+      padding: 8px 16px !important;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+      }
+      
+      .seed {
+        font-weight: bold;
+        margin-right: 8px;
+      }
+      
+      .name {
+        margin-right: 8px;
+      }
+      
+      mat-icon {
+        font-size: 16px;
+        opacity: 0.8;
+        
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
+
+.available-players {
+  margin-bottom: 24px;
+  
+  h6 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    &::before {
+      content: '👥';
+      font-size: 1rem;
+    }
+  }
+}
+
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.player-card {
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  
+  &.clickable {
+    cursor: pointer;
+    
+    &:hover {
+      border-color: var(--tennis-green);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+    }
+  }
+  
+  .seed {
+    background: linear-gradient(135deg, var(--tennis-green) 0%, var(--tennis-green-light) 100%);
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-right: 12px;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+  }
+  
+  .name {
+    flex: 1;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+  }
+  
+  button {
+    padding: 4px !important;
+    min-width: auto !important;
+    color: var(--tennis-orange) !important;
+    
+    mat-icon {
+      font-size: 18px;
+    }
+    
+    &:hover {
+      background-color: rgba(255, 122, 26, 0.1) !important;
+    }
+  }
+}
+
+.created-teams {
+  margin-bottom: 24px;
+  
+  h6 {
+    color: var(--tennis-green-light);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    &::before {
+      content: '🏆';
+      font-size: 1rem;
+    }
+  }
+}
+
+.team-preview {
+  background: var(--bg-elevated);
+  border: 2px solid var(--tennis-green);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+  }
+  
+  .team-info {
+    flex: 1;
+    
+    .team-name {
+      font-weight: 600;
+      color: var(--tennis-green-light);
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 8px;
+    }
+    
+    .team-players {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+      
+      .player {
+        display: flex;
+        align-items: center;
+        
+        .seed {
+          background: linear-gradient(135deg, var(--tennis-green) 0%, var(--tennis-green-light) 100%);
+          color: white;
+          border-radius: 50%;
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.7rem;
+          font-weight: bold;
+          margin-right: 6px;
+        }
+        
+        .name {
+          font-size: 0.9rem;
+          color: var(--text-primary);
+        }
+      }
+      
+      .plus {
+        color: var(--tennis-orange);
+        font-weight: bold;
+        font-size: 1.1rem;
+      }
+    }
+    
+    .avg-seed {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+  }
+  
+  button {
+    padding: 8px !important;
+    min-width: auto !important;
+    color: #f44336 !important;
+    
+    mat-icon {
+      font-size: 20px;
+    }
+    
+    &:hover {
+      background-color: rgba(244, 67, 54, 0.1) !important;
+    }
+  }
+}
+
+.reserve-players-manual {
+  margin-bottom: 24px;
+  
+  h6 {
+    color: var(--tennis-orange);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    &::before {
+      content: '🪑';
+      font-size: 1rem;
+    }
+  }
+  
+  .reserve-list {
+    mat-chip-listbox {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      
+      mat-chip-option {
+        background: linear-gradient(135deg, rgba(255, 122, 26, 0.1) 0%, rgba(255, 171, 64, 0.1) 100%) !important;
+        border: 1px solid var(--tennis-orange) !important;
+        color: var(--text-primary) !important;
+        border-radius: 20px !important;
+        padding: 8px 16px !important;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        
+        &:hover {
+          transform: translateY(-2px);
+          background: linear-gradient(135deg, rgba(255, 122, 26, 0.2) 0%, rgba(255, 171, 64, 0.2) 100%) !important;
+        }
+        
+        .seed {
+          background: linear-gradient(135deg, var(--tennis-orange) 0%, var(--tennis-orange-light) 100%);
+          color: white;
+          border-radius: 50%;
+          width: 20px;
+          height: 20px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.7rem;
+          font-weight: bold;
+          margin-right: 8px;
+        }
+        
+        .name {
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
+.manual-pairing-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+  
+  button {
+    padding: 12px 24px !important;
+    border-radius: 24px !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    
+    &[color="primary"] {
+      background: linear-gradient(135deg, var(--tennis-green) 0%, var(--tennis-green-light) 100%) !important;
+      color: white !important;
+      box-shadow: 0 4px 16px rgba(46, 125, 50, 0.3);
+      
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+      }
+    }
+    
+    &:not([color]) {
+      background: var(--bg-elevated) !important;
+      color: var(--text-secondary) !important;
+      border: 1px solid var(--border-color) !important;
+      
+      &:hover {
+        background: var(--bg-card) !important;
+        color: var(--text-primary) !important;
+      }
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}

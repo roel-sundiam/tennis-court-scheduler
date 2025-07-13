@@ -9,12 +9,17 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatInputModule } from '@angular/material/input';
 import { Poll } from '../../models/poll.model';
 import { PollService } from '../../services/poll.service';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { PlayersService } from '../../mock-data/players.service';
 import { Player } from '../../mock-data/mock-players';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AlertDialogComponent } from '../../components/alert-dialog/alert-dialog.component';
 
@@ -25,6 +30,7 @@ import { AlertDialogComponent } from '../../components/alert-dialog/alert-dialog
     CommonModule,
     RouterModule,
     FormsModule,
+    ReactiveFormsModule,
     MatButtonModule,
     MatProgressSpinnerModule,
     MatToolbarModule,
@@ -34,6 +40,8 @@ import { AlertDialogComponent } from '../../components/alert-dialog/alert-dialog
     MatSelectModule,
     MatFormFieldModule,
     MatCheckboxModule,
+    MatAutocompleteModule,
+    MatInputModule,
     MatDialogModule // Import MatDialogModule
   ],
   templateUrl: './poll-details.component.html',
@@ -49,6 +57,10 @@ export class PollDetailsComponent implements OnInit {
   error = '';
   submitting = false;
 
+  // Autocomplete form control and filtered players
+  playerControl = new FormControl();
+  filteredPlayers!: Observable<Player[]>;
+
   constructor(
     private route: ActivatedRoute,
     private pollService: PollService,
@@ -60,6 +72,23 @@ export class PollDetailsComponent implements OnInit {
   ngOnInit() {
     this.loadPoll();
     this.loadPlayers();
+    this.setupAutocomplete();
+  }
+
+  setupAutocomplete() {
+    this.filteredPlayers = this.playerControl.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterPlayers(value || ''))
+    );
+  }
+
+  private _filterPlayers(value: string): Player[] {
+    const filterValue = value.toLowerCase();
+    const sortedPlayers = this.getSortedPlayersByName();
+    
+    return sortedPlayers.filter(player => 
+      player.name.toLowerCase().includes(filterValue)
+    );
   }
 
   loadPoll() {
@@ -94,6 +123,7 @@ export class PollDetailsComponent implements OnInit {
     this.playersService.getPlayers().subscribe({
       next: (players) => {
         this.players = players;
+        this.setupAutocomplete(); // Setup autocomplete after players are loaded
       },
       error: () => {
         this.error = 'Failed to load players';
@@ -191,6 +221,13 @@ export class PollDetailsComponent implements OnInit {
     const selectedOptionIds = Object.keys(this.selectedDates)
       .filter(dateId => this.selectedDates[dateId]);
 
+    console.log('🔍 Frontend vote submission debug:');
+    console.log('- Poll ID:', pollId);
+    console.log('- Player ID:', selectedPlayer.id);
+    console.log('- Player Name:', selectedPlayer.name);
+    console.log('- Selected Option IDs:', selectedOptionIds);
+    console.log('- Selected Dates Object:', this.selectedDates);
+
     this.pollService.submitVotes(pollId, selectedPlayer.id, selectedPlayer.name, selectedOptionIds).subscribe({
       next: (response: any) => {
         console.log('Vote submission response:', response);
@@ -200,6 +237,20 @@ export class PollDetailsComponent implements OnInit {
           this.poll = response.poll;
           console.log('Updated poll after submission:', this.poll);
         }
+        
+        // Clear generated teams since votes have changed
+        this.pollService.clearGeneratedTeams(pollId).subscribe({
+          next: (clearResponse) => {
+            console.log('✅ Generated teams cleared due to vote changes:', clearResponse);
+            if (clearResponse.clearedCount > 0) {
+              console.log(`🗑️ Cleared ${clearResponse.clearedCount} generated team entries`);
+            }
+          },
+          error: (err) => {
+            console.warn('⚠️ Failed to clear generated teams:', err);
+            // Don't fail the vote submission if team clearing fails
+          }
+        });
         
         this.submitting = false;
         this.openAlertDialog('Success', response.message || 'Vote submitted successfully!');
@@ -284,6 +335,20 @@ export class PollDetailsComponent implements OnInit {
   getSelectedPlayerName(): string {
     const selectedPlayer = this.players.find(player => player.id === this.selectedPlayerId);
     return selectedPlayer ? selectedPlayer.name : '';
+  }
+
+  getSortedPlayersByName(): any[] {
+    return [...this.players].sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  onPlayerSelected(player: Player) {
+    this.selectedPlayerId = player.id;
+    this.playerControl.setValue(player.name);
+    this.onPlayerSelectionChange();
+  }
+
+  displayPlayerName(player: Player): string {
+    return player ? player.name : '';
   }
 
   openAlertDialog(title: string, message: string): void {

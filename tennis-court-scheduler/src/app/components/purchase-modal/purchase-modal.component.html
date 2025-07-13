@@ -1,0 +1,111 @@
+<div class="purchase-modal">
+  <div class="modal-header">
+    <h2 mat-dialog-title>
+      <mat-icon class="title-icon">monetization_on</mat-icon>
+      Purchase Coins
+    </h2>
+    <button mat-icon-button class="close-button" (click)="onClose()" [disabled]="isProcessing">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div mat-dialog-content class="modal-content">
+    <div class="intro-section">
+      <p class="intro-text">
+        Choose a coin package to access premium features like activity logs, analytics, and user insights.
+      </p>
+    </div>
+
+    <div class="packages-grid">
+      <mat-card 
+        *ngFor="let package of coinPackages" 
+        class="package-card"
+        [class.popular]="package.popular"
+        [class.processing]="isProcessing">
+        
+        <div class="popular-badge" *ngIf="package.popular">
+          <mat-icon>star</mat-icon>
+          <span>Most Popular</span>
+        </div>
+
+        <mat-card-header class="package-header">
+          <mat-card-title>{{ package.name }}</mat-card-title>
+          <mat-card-subtitle>{{ package.description }}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content class="package-content">
+          <div class="price-section">
+            <div class="price">${{ package.price }}</div>
+            <div class="coins-breakdown">
+              <div class="base-coins">
+                <mat-icon>monetization_on</mat-icon>
+                <span>{{ package.coins }} coins</span>
+              </div>
+              <div class="bonus-coins" *ngIf="package.bonus > 0">
+                <mat-icon class="bonus-icon">add</mat-icon>
+                <span>{{ package.bonus }} bonus!</span>
+              </div>
+            </div>
+            <div class="total-coins">
+              Total: {{ getTotalCoins(package) }} coins
+            </div>
+            <div class="value-indicator">
+              {{ getValuePerDollar(package) | number:'1.1-1' }} coins per $1
+            </div>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions class="package-actions">
+          <button 
+            mat-raised-button 
+            color="primary"
+            class="purchase-button"
+            [disabled]="isProcessing"
+            (click)="purchaseCoins(package)">
+            
+            <div *ngIf="!isProcessing" class="button-content">
+              <mat-icon>shopping_cart</mat-icon>
+              <span>Purchase</span>
+            </div>
+            
+            <div *ngIf="isProcessing" class="button-content processing">
+              <mat-icon class="spin">refresh</mat-icon>
+              <span>Processing...</span>
+            </div>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+
+    <div class="payment-info">
+      <div class="payment-methods">
+        <h3>Accepted Payment Methods</h3>
+        <div class="methods-list">
+          <div class="method">
+            <mat-icon>credit_card</mat-icon>
+            <span>Credit Cards</span>
+          </div>
+          <div class="method">
+            <mat-icon>account_balance</mat-icon>
+            <span>Bank Transfer</span>
+          </div>
+          <div class="method">
+            <mat-icon>payment</mat-icon>
+            <span>Digital Wallets</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="security-note">
+        <mat-icon>security</mat-icon>
+        <span>Your payment information is secure and encrypted</span>
+      </div>
+    </div>
+  </div>
+
+  <div mat-dialog-actions class="modal-actions">
+    <button mat-button (click)="onClose()" [disabled]="isProcessing">
+      Cancel
+    </button>
+  </div>
+</div>

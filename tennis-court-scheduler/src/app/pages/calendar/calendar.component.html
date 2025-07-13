@@ -1,8 +1,48 @@
 <mat-toolbar color="primary">
   <span>Tennis Match Calendar</span>
+  <span class="spacer"></span>
+  <!-- Coin status for non-unlimited users -->
+  <div class="coin-status" *ngIf="!coinService.hasUnlimitedAccess()">
+    <mat-icon class="coin-icon">monetization_on</mat-icon>
+    <span>{{ coinBalance }}</span>
+  </div>
+  <!-- Unlimited badge for RoelSundiam -->
+  <div class="unlimited-badge" *ngIf="coinService.hasUnlimitedAccess()">
+    <mat-icon>all_inclusive</mat-icon>
+    <span>Unlimited</span>
+  </div>
 </mat-toolbar>
 
-<div class="container" *ngIf="!isLoading; else loading">
+<!-- Access Control -->
+<div class="access-denied" *ngIf="!hasAccess && !isLoading">
+  <mat-card class="premium-card">
+    <mat-card-header>
+      <mat-icon class="premium-icon">calendar_month</mat-icon>
+      <mat-card-title>Premium Calendar Access</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p>Access the tennis match calendar for {{ pageCost }} coin.</p>
+      <p *ngIf="!coinService.hasUnlimitedAccess()">Current balance: {{ coinBalance }} coins</p>
+      <div class="access-actions">
+        <button mat-raised-button 
+                color="primary" 
+                (click)="checkPageAccess()" 
+                [disabled]="!coinService.canAfford('CALENDAR_VIEW')">
+          <mat-icon>monetization_on</mat-icon>
+          Access Calendar ({{ pageCost }} coin)
+        </button>
+        <button mat-button 
+                (click)="openPurchaseModal()" 
+                *ngIf="!coinService.canAfford('CALENDAR_VIEW') && !coinService.hasUnlimitedAccess()">
+          <mat-icon>add_shopping_cart</mat-icon>
+          Buy More Coins
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<div class="container" *ngIf="!isLoading && hasAccess; else loading">
   <!-- Calendar Navigation --> 
   <div class="calendar-header">
     <div class="navigation-controls">

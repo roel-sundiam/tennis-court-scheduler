@@ -1,0 +1,394 @@
+.admin-panel-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  
+  .header {
+    text-align: center;
+    margin-bottom: 30px;
+    
+    h1 {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 0;
+      color: var(--primary-color, #bb86fc);
+      
+      mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: var(--primary-color, #bb86fc);
+      }
+    }
+    
+    p {
+      margin: 10px 0 0 0;
+      color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+    }
+  }
+}
+
+.balance-card {
+  margin-bottom: 20px;
+  
+  .balance-display {
+    .balance-number {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        color: var(--success-color, #4caf50);
+      }
+      
+      .balance-value {
+        font-size: 28px;
+        font-weight: bold;
+        color: var(--success-color, #4caf50);
+      }
+    }
+    
+    .balance-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      
+      .stat {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px;
+        background: var(--surface-color, rgba(255, 255, 255, 0.05));
+        border-radius: 8px;
+        border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+        
+        .label {
+          font-weight: 500;
+          color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+        }
+        
+        .value {
+          font-weight: bold;
+          color: var(--text-primary, rgba(255, 255, 255, 0.87));
+        }
+      }
+    }
+  }
+  
+  .no-balance {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+    
+    mat-icon {
+      color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+    }
+  }
+}
+
+.add-coins-card {
+  margin-bottom: 20px;
+  
+  .quick-amounts {
+    margin-bottom: 20px;
+    
+    h3 {
+      margin: 0 0 15px 0;
+      color: var(--text-primary, rgba(255, 255, 255, 0.87));
+      font-size: 16px;
+      font-weight: 500;
+    }
+    
+    .amount-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      
+      button {
+        min-width: 80px;
+        color: var(--text-primary, rgba(255, 255, 255, 0.87));
+        border-color: var(--border-color, rgba(255, 255, 255, 0.12));
+        
+        &.selected {
+          background: var(--primary-color, #bb86fc);
+          color: var(--on-primary, #000000);
+          border-color: var(--primary-color, #bb86fc);
+        }
+        
+        &:hover {
+          background: var(--surface-hover, rgba(255, 255, 255, 0.08));
+        }
+      }
+    }
+  }
+  
+  .custom-form {
+    margin-top: 20px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    
+    .amount-field {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .description-field {
+      flex: 2;
+      min-width: 300px;
+    }
+  }
+}
+
+.info-card {
+  margin-bottom: 20px;
+  
+  mat-card-content {
+    ul {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--text-primary, rgba(255, 255, 255, 0.87));
+      
+      li {
+        margin-bottom: 10px;
+        line-height: 1.5;
+        color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .admin-panel-container {
+    padding: 10px;
+    
+    .custom-form {
+      flex-direction: column;
+      
+      .amount-field,
+      .description-field {
+        min-width: 100%;
+      }
+    }
+    
+    .amount-buttons {
+      justify-content: center;
+    }
+    
+    .balance-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// Theme variables for dark mode
+:host {
+  --primary-color: #bb86fc;
+  --primary-variant: #3700b3;
+  --secondary-color: #03dac6;
+  --background-color: #121212;
+  --surface-color: rgba(255, 255, 255, 0.05);
+  --surface-hover: rgba(255, 255, 255, 0.08);
+  --error-color: #cf6679;
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --text-primary: rgba(255, 255, 255, 0.87);
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-disabled: rgba(255, 255, 255, 0.38);
+  --border-color: rgba(255, 255, 255, 0.12);
+  --on-primary: #000000;
+  --on-surface: #ffffff;
+}
+
+// Enhanced card styling for dark theme
+.balance-card,
+.add-coins-card,
+.info-card {
+  mat-card {
+    background: var(--surface-color) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 12px !important;
+  }
+  
+  mat-card-header {
+    .mat-card-title {
+      color: var(--text-primary) !important;
+      font-weight: 600;
+    }
+    
+    .mat-card-subtitle {
+      color: var(--text-secondary) !important;
+    }
+    
+    [mat-card-avatar] {
+      background: var(--primary-color) !important;
+      color: var(--on-primary) !important;
+    }
+  }
+}
+
+// Loading spinner
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  
+  mat-icon {
+    color: var(--primary-color);
+    animation: spin 2s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Snackbar styling
+::ng-deep {
+  .success-snackbar {
+    background: var(--success-color) !important;
+    color: white !important;
+  }
+  
+  .error-snackbar {
+    background: var(--error-color) !important;
+    color: white !important;
+  }
+  
+  // Fix form field colors
+  .mat-form-field {
+    .mat-form-field-label {
+      color: var(--text-secondary) !important;
+    }
+    
+    .mat-input-element {
+      color: var(--text-primary) !important;
+    }
+    
+    .mat-form-field-outline {
+      color: var(--border-color) !important;
+    }
+    
+    .mat-form-field-outline-start,
+    .mat-form-field-outline-end,
+    .mat-form-field-outline-gap {
+      border-color: var(--border-color) !important;
+    }
+    
+    &.mat-focused {
+      .mat-form-field-outline-thick {
+        color: var(--primary-color) !important;
+      }
+      
+      .mat-form-field-outline-start,
+      .mat-form-field-outline-end,
+      .mat-form-field-outline-gap {
+        border-color: var(--primary-color) !important;
+      }
+      
+      .mat-form-field-label {
+        color: var(--primary-color) !important;
+      }
+    }
+    
+    .mat-form-field-prefix,
+    .mat-form-field-suffix {
+      color: var(--text-secondary) !important;
+    }
+    
+    .mat-form-field-hint {
+      color: var(--text-secondary) !important;
+    }
+    
+    .mat-error {
+      color: var(--error-color) !important;
+    }
+  }
+  
+  // Fix button colors
+  .mat-raised-button.mat-primary {
+    background-color: var(--primary-color) !important;
+    color: var(--on-primary) !important;
+  }
+  
+  .mat-stroked-button {
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+    
+    &:hover {
+      background-color: var(--surface-hover) !important;
+    }
+  }
+  
+  // Fix all text elements that might be dark
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary) !important;
+  }
+  
+  p, span, div, label {
+    color: var(--text-primary) !important;
+  }
+  
+  .mat-card-content {
+    color: var(--text-primary) !important;
+    
+    * {
+      color: inherit !important;
+    }
+  }
+  
+  .mat-list-item {
+    color: var(--text-primary) !important;
+  }
+  
+  .mat-option-text {
+    color: var(--text-primary) !important;
+  }
+  
+  .mat-select-value-text {
+    color: var(--text-primary) !important;
+  }
+  
+  .mat-input-placeholder {
+    color: var(--text-secondary) !important;
+  }
+  
+  .mat-form-field-appearance-outline .mat-form-field-infix {
+    color: var(--text-primary) !important;
+  }
+  
+  // Force all text content to be light
+  .admin-panel-container {
+    * {
+      color: var(--text-primary) !important;
+    }
+    
+    // Exception for icons that should keep their colors
+    mat-icon {
+      color: inherit !important;
+    }
+    
+    // Exception for specific colored elements
+    .balance-value {
+      color: var(--success-color) !important;
+    }
+    
+    .mat-card-title {
+      color: var(--text-primary) !important;
+    }
+    
+    .mat-card-subtitle {
+      color: var(--text-secondary) !important;
+    }
+  }
+}

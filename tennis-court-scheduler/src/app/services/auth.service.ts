@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, of } from 'rxjs';
+import { ActivityLoggerService } from './activity-logger.service';
 
 export interface User {
   username: string;
@@ -15,15 +16,22 @@ export class AuthService {
   private userSubject = new BehaviorSubject<User | null>(this.getStoredUser());
   user$ = this.userSubject.asObservable();
 
+  private activityLogger?: ActivityLoggerService;
 
   constructor(private router: Router) {}
+
+  // Setter for ActivityLoggerService to avoid circular dependency
+  setActivityLogger(activityLogger: ActivityLoggerService) {
+    this.activityLogger = activityLogger;
+  }
 
   login(username: string, password: string): Observable<User | null> {
     // Mock admin credentials
     const adminUsers = [
       { username: 'admin', password: 'admin123' },
       { username: 'sundi', password: 'sundi123' },
-      { username: 'VGTennisMorningCub', password: 'VGTennis123' }  // VG Tennis Morning Club admin
+      { username: 'VGTennisMorningCub', password: 'VGTennis123' },  // VG Tennis Morning Club admin
+      { username: 'RoelSundiam', password: '0411' }  // Special admin for activity logs access
     ];
     
     // Check if credentials match any admin user
@@ -38,6 +46,12 @@ export class AuthService {
         token: `mock-admin-token-${adminMatch.username}`
       };
       this.setUser(user);
+      
+      // Log successful login
+      if (this.activityLogger) {
+        this.activityLogger.logLogin(user.username, user.role);
+      }
+      
       return of(user);
     }
     
@@ -49,12 +63,25 @@ export class AuthService {
         token: 'mock-user-token'
       };
       this.setUser(user);
+      
+      // Log successful login
+      if (this.activityLogger) {
+        this.activityLogger.logLogin(user.username, user.role);
+      }
+      
       return of(user);
     }
     return of(null);
   }
 
   logout() {
+    const currentUser = this.userSubject.value;
+    
+    // Log logout before clearing user data
+    if (this.activityLogger && currentUser) {
+      this.activityLogger.logLogout(currentUser.username);
+    }
+    
     localStorage.removeItem('auth_user');
     this.userSubject.next(null);
     this.router.navigate(['/']);

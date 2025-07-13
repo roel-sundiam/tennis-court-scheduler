@@ -1,15 +1,55 @@
 <div class="players-container">
-  <div class="header">
-    <h1>Players Management</h1>
-    <button *ngIf="auth.isAdmin()" class="btn btn-primary" routerLink="/players/new" [disabled]="saving">
-      <i class="fas fa-plus"></i> Add New Player
-    </button>
+  <!-- Access Denied State -->
+  <div *ngIf="!hasAccess" class="access-denied">
+    <mat-card class="premium-card">
+      <mat-card-header>
+        <mat-icon class="premium-icon">people</mat-icon>
+        <mat-card-title>Premium Feature</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Access to Players Management requires {{ pageCost }} coin{{ pageCost > 1 ? 's' : '' }}.</p>
+        <p *ngIf="!coinService.hasUnlimitedAccess()">
+          Current balance: {{ coinBalance }} coin{{ coinBalance === 1 ? '' : 's' }}
+        </p>
+        <div class="access-actions">
+          <button mat-raised-button 
+                  color="accent" 
+                  (click)="checkPageAccess()"
+                  [disabled]="!coinService.canAfford('PLAYERS_VIEW')">
+            <mat-icon>payment</mat-icon>
+            Purchase Access ({{ pageCost }} 🪙)
+          </button>
+          <button mat-stroked-button 
+                  (click)="openPurchaseModal()"
+                  *ngIf="!coinService.canAfford('PLAYERS_VIEW')">
+            <mat-icon>shopping_cart</mat-icon>
+            Buy More Coins
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
+
+  <!-- Main Content (Accessible) -->
+  <div *ngIf="hasAccess">
+    <div class="header">
+      <h1>Players Management</h1>
+      <button *ngIf="auth.isAdmin()" 
+              class="btn btn-primary" 
+              routerLink="/players/new" 
+              [disabled]="saving || !coinService.canAfford('PLAYER_ADD')"
+              [title]="coinService.canAfford('PLAYER_ADD') ? 'Add new player (2 coins)' : 'Insufficient coins to add player'">
+        <i class="fas fa-plus"></i> Add New Player
+        <span class="coin-cost" *ngIf="!coinService.hasUnlimitedAccess()">
+          (2 🪙)
+        </span>
+      </button>
+    </div>
 
   <div class="players-table-container">
     <div class="drag-instructions">
-      <i class="fas fa-grip-vertical"></i>
-      <span>Drag players to reorder by seed number</span>
+      <mat-icon>drag_indicator</mat-icon>
+      <span>Use the drag handle to reorder players by seed ranking</span>
     </div>
     
     <div cdkDropList (cdkDropListDropped)="onDrop($event)" class="players-list" [cdkDropListDisabled]="saving">
@@ -19,8 +59,8 @@
            [class.cdk-drag-preview]="false"
            [cdkDragDisabled]="saving">
         
-        <div class="drag-handle">
-          <i class="fas fa-grip-vertical"></i>
+        <div class="drag-handle" cdkDragHandle>
+          <mat-icon>drag_indicator</mat-icon>
         </div>
         
         <div class="player-info">
@@ -31,11 +71,19 @@
         </div>
         
         <div class="actions-cell" *ngIf="auth.isAdmin()">
-          <button class="btn btn-sm btn-outline-primary" [routerLink]="['/players', player.id, 'edit']" [disabled]="saving">
+          <button class="btn btn-sm btn-outline-primary" 
+                  [routerLink]="['/players', player.id, 'edit']" 
+                  [disabled]="saving || !coinService.canAfford('PLAYER_EDIT')"
+                  [title]="coinService.canAfford('PLAYER_EDIT') ? 'Edit player (1 coin)' : 'Insufficient coins to edit player'">
             <i class="fas fa-edit"></i> <span class="btn-text">Edit</span>
+            <span class="coin-cost" *ngIf="!coinService.hasUnlimitedAccess()">(1 🪙)</span>
           </button>
-          <button class="btn btn-sm btn-outline-danger" (click)="deletePlayer(player.id)" [disabled]="saving">
+          <button class="btn btn-sm btn-outline-danger" 
+                  (click)="deletePlayer(player.id)" 
+                  [disabled]="saving || !coinService.canAfford('PLAYER_DELETE')"
+                  [title]="coinService.canAfford('PLAYER_DELETE') ? 'Delete player (1 coin)' : 'Insufficient coins to delete player'">
             <i class="fas fa-trash"></i> <span class="btn-text">Delete</span>
+            <span class="coin-cost" *ngIf="!coinService.hasUnlimitedAccess()">(1 🪙)</span>
           </button>
         </div>
       </div>
@@ -46,8 +94,9 @@
     </div>
   </div>
 
-  <div class="spinner-overlay" *ngIf="saving">
-    <div class="spinner"></div>
-    <div class="spinner-text">Saving...</div>
+    <div class="spinner-overlay" *ngIf="saving">
+      <div class="spinner"></div>
+      <div class="spinner-text">Saving...</div>
+    </div>
   </div>
 </div> 

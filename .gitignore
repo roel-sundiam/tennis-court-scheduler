@@ -17,6 +17,9 @@ build/
 .env.test.local
 .env.production.local
 
+# Security - User credentials file
+users.md
+
 # Angular specific
 .angular/
 .ng_pkg_build/

@@ -1,0 +1,409 @@
+// About Developer Component - Dark Theme Styling
+:host {
+  --primary-color: #bb86fc;
+  --primary-variant: #3700b3;
+  --secondary-color: #03dac6;
+  --surface-color: rgba(255, 255, 255, 0.05);
+  --surface-elevated: rgba(255, 255, 255, 0.12);
+  --text-primary: rgba(255, 255, 255, 0.87);
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-disabled: rgba(255, 255, 255, 0.38);
+  --border-color: rgba(255, 255, 255, 0.12);
+  --on-primary: #000000;
+}
+
+.about-developer-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  
+  .header {
+    text-align: center;
+    margin-bottom: 30px;
+    
+    h1 {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 0 0 10px 0;
+      color: var(--primary-color);
+      font-size: 2rem;
+      font-weight: 600;
+      
+      mat-icon {
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+        color: var(--primary-color);
+      }
+    }
+    
+    p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      margin: 0;
+      font-weight: 400;
+    }
+  }
+}
+
+// Enhanced card styling for dark theme
+.profile-card,
+.skills-card,
+.project-card,
+.acknowledgments-card {
+  margin-bottom: 24px;
+  
+  mat-card {
+    background: var(--surface-color) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 12px !important;
+  }
+  
+  mat-card-header {
+    .mat-card-title {
+      color: var(--text-primary) !important;
+      font-weight: 600;
+    }
+    
+    .mat-card-subtitle {
+      color: var(--text-secondary) !important;
+    }
+    
+    [mat-card-avatar] {
+      background: var(--primary-color) !important;
+      color: var(--on-primary) !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      mat-icon {
+        color: var(--on-primary) !important;
+      }
+      
+      &.custom-avatar {
+        background: transparent !important;
+        border: 3px solid var(--primary-color) !important;
+        padding: 2px;
+        border-radius: 50%;
+        overflow: hidden;
+        
+        .avatar-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 50%;
+        }
+      }
+    }
+  }
+  
+  mat-card-content {
+    color: var(--text-primary) !important;
+    
+    // Force all text to be light
+    * {
+      color: var(--text-primary) !important;
+    }
+    
+    // Secondary text elements
+    p, .stat-label, .tech-category h5 {
+      color: var(--text-secondary) !important;
+    }
+  }
+}
+
+.profile-content {
+  .bio-section,
+  .contact-section {
+    margin-bottom: 24px;
+    
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary-color);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      
+      mat-icon {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+        width: 1.2rem;
+        height: 1.2rem;
+      }
+    }
+    
+    p {
+      color: var(--text-secondary) !important;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+  }
+  
+  .contact-info {
+    margin-bottom: 20px;
+    
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      
+      mat-icon {
+        color: var(--primary-color);
+        font-size: 1rem;
+        width: 1rem;
+        height: 1rem;
+        flex-shrink: 0;
+      }
+      
+      span {
+        word-break: break-all;
+      }
+    }
+  }
+  
+  .contact-links {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    
+    button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      mat-icon {
+        font-size: 1rem;
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+  }
+}
+
+.skills-grid {
+  mat-chip-set {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    
+    .skill-chip {
+      background: var(--surface-elevated) !important;
+      color: var(--text-primary) !important;
+      border: 1px solid var(--border-color);
+      
+      &:hover {
+        background: var(--primary-color) !important;
+        color: var(--on-primary) !important;
+      }
+    }
+  }
+}
+
+.project-content {
+  .project-description {
+    margin-bottom: 24px;
+    
+    h4 {
+      color: var(--primary-color) !important;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    p {
+      color: var(--text-secondary) !important;
+      line-height: 1.6;
+      margin: 0;
+    }
+  }
+  
+  .project-features {
+    margin: 24px 0;
+    
+    h4 {
+      color: var(--primary-color) !important;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      
+      .feature-item {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 12px;
+        background: var(--surface-elevated);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        
+        mat-icon {
+          color: var(--primary-color);
+          margin-top: 2px;
+          flex-shrink: 0;
+        }
+        
+        div {
+          strong {
+            color: var(--text-primary) !important;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+          }
+          
+          p {
+            color: var(--text-secondary) !important;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            margin: 0;
+          }
+        }
+      }
+    }
+  }
+  
+  .tech-stack-section {
+    margin-top: 24px;
+    
+    h4 {
+      color: var(--primary-color) !important;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    
+    .tech-categories {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      
+      .tech-category {
+        h5 {
+          color: var(--text-primary) !important;
+          font-size: 1rem;
+          font-weight: 500;
+          margin-bottom: 8px;
+        }
+        
+        mat-chip-set {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          
+          mat-chip {
+            background: var(--surface-elevated) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .about-developer-container {
+    padding: 10px;
+    
+    .contact-links {
+      flex-direction: column;
+      
+      button {
+        justify-content: center;
+      }
+    }
+    
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .tech-categories {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// Dark theme overrides
+::ng-deep {
+  .about-developer-container {
+    .mat-card {
+      background: var(--surface-color) !important;
+      color: var(--text-primary) !important;
+      border: 1px solid var(--border-color) !important;
+    }
+    
+    .mat-card-title {
+      color: var(--text-primary) !important;
+    }
+    
+    .mat-card-subtitle {
+      color: var(--text-secondary) !important;
+    }
+    
+    .mat-stroked-button {
+      border-color: var(--border-color) !important;
+      color: var(--text-primary) !important;
+      
+      &:hover {
+        background-color: var(--surface-elevated) !important;
+        border-color: var(--primary-color) !important;
+        color: var(--primary-color) !important;
+      }
+    }
+    
+    .mat-divider {
+      border-top-color: var(--border-color) !important;
+      margin: 20px 0;
+    }
+    
+    .mat-chip {
+      background: var(--surface-elevated) !important;
+      color: var(--text-primary) !important;
+    }
+  }
+  
+  // Comprehensive text color override
+  .about-developer-container {
+    // Force all text to be light
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--text-primary) !important;
+    }
+    
+    p, span, div, label, strong {
+      color: var(--text-primary) !important;
+    }
+    
+    // Secondary text elements
+    .mat-card-subtitle,
+    .project-description p,
+    .feature-item p,
+    .bio-section p {
+      color: var(--text-secondary) !important;
+    }
+    
+    // All card content
+    mat-card-content {
+      * {
+        color: var(--text-primary) !important;
+      }
+      
+      p, .stat-label {
+        color: var(--text-secondary) !important;
+      }
+    }
+  }
+}

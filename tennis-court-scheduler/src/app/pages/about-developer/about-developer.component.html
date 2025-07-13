@@ -1,0 +1,219 @@
+<div class="about-developer-container">
+  <!-- Header Section -->
+  <div class="header">
+    <h1>
+      <mat-icon>person</mat-icon>
+      About the Developer
+    </h1>
+    <p>Meet the person behind this tennis court scheduling application</p>
+  </div>
+
+  <!-- Developer Profile Card -->
+  <mat-card class="profile-card">
+    <mat-card-header>
+      <div mat-card-avatar class="custom-avatar">
+        <img src="assets/botsundi.png" alt="Roel Sundiam - Developer" class="avatar-image">
+      </div>
+      <mat-card-title>Full Stack Developer</mat-card-title>
+      <mat-card-subtitle>Passionate about creating efficient web solutions</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="profile-content">
+        <div class="bio-section">
+          <h3>
+            <mat-icon>info</mat-icon>
+            About Me
+          </h3>
+          <p>
+            I'm a dedicated full-stack developer with a passion for creating user-friendly and efficient web applications. 
+            This tennis court scheduling system was built to solve real-world problems faced by tennis clubs and sports 
+            organizations in managing their facilities and player coordination.
+          </p>
+          <p>
+            With expertise in modern web technologies, I focus on building scalable, maintainable, and intuitive 
+            applications that provide genuine value to users.
+          </p>
+        </div>
+
+        <div class="contact-section">
+          <h3>
+            <mat-icon>contact_mail</mat-icon>
+            Get in Touch
+          </h3>
+          
+          <div class="contact-links">
+            <button mat-stroked-button (click)="sendEmail()">
+              <mat-icon>email</mat-icon>
+              Email Me
+            </button>
+            <button mat-stroked-button (click)="openLink(linkedinUrl)">
+              <mat-icon>work</mat-icon>
+              LinkedIn
+            </button>
+            <button mat-stroked-button (click)="openLink(githubUrl)">
+              <mat-icon>code</mat-icon>
+              GitHub
+            </button>
+            <button mat-stroked-button (click)="openLink(facebookUrl)">
+              <mat-icon>facebook</mat-icon>
+              Facebook
+            </button>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Skills Card -->
+  <mat-card class="skills-card">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>build</mat-icon>
+      </div>
+      <mat-card-title>Technical Skills</mat-card-title>
+      <mat-card-subtitle>Technologies and tools I work with</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="skills-grid">
+        <mat-chip-set>
+          <mat-chip *ngFor="let skill of skills" class="skill-chip">
+            {{ skill }}
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Project Details Card -->
+  <mat-card class="project-card">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>sports_tennis</mat-icon>
+      </div>
+      <mat-card-title>Tennis Court Scheduler</mat-card-title>
+      <mat-card-subtitle>Project Overview & Features</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="project-content">
+        <div class="project-description">
+          <h4>Project Description</h4>
+          <p>
+            A comprehensive web application designed to streamline tennis club operations through intelligent 
+            scheduling, player management, and automated team generation. The system features a poll-based 
+            scheduling approach that democratizes court booking decisions.
+          </p>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="project-features">
+          <h4>Key Features</h4>
+          <div class="features-grid">
+            <div class="feature-item">
+              <mat-icon>poll</mat-icon>
+              <div>
+                <strong>Poll-Based Scheduling</strong>
+                <p>Democratic voting system for optimal time slot selection</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <mat-icon>people</mat-icon>
+              <div>
+                <strong>Player Management</strong>
+                <p>Comprehensive player profiles with seeding and statistics</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <mat-icon>groups</mat-icon>
+              <div>
+                <strong>Smart Team Generation</strong>
+                <p>Automated balanced team creation based on player skills</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <mat-icon>calendar_month</mat-icon>
+              <div>
+                <strong>Calendar Integration</strong>
+                <p>Visual calendar view for easy schedule management</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <mat-icon>toll</mat-icon>
+              <div>
+                <strong>Coin System</strong>
+                <p>Fair usage system for premium features and controls</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <mat-icon>admin_panel_settings</mat-icon>
+              <div>
+                <strong>Admin Dashboard</strong>
+                <p>Comprehensive management tools and analytics</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="tech-stack-section">
+          <h4>Technology Stack</h4>
+          <div class="tech-categories">
+            <div class="tech-category">
+              <h5>Frontend</h5>
+              <mat-chip-set>
+                <mat-chip>Angular 17</mat-chip>
+                <mat-chip>TypeScript</mat-chip>
+                <mat-chip>Material Design</mat-chip>
+                <mat-chip>SCSS</mat-chip>
+              </mat-chip-set>
+            </div>
+            <div class="tech-category">
+              <h5>Backend</h5>
+              <mat-chip-set>
+                <mat-chip>Node.js</mat-chip>
+                <mat-chip>Express.js</mat-chip>
+                <mat-chip>MongoDB</mat-chip>
+                <mat-chip>REST APIs</mat-chip>
+              </mat-chip-set>
+            </div>
+            <div class="tech-category">
+              <h5>Features</h5>
+              <mat-chip-set>
+                <mat-chip>Responsive Design</mat-chip>
+                <mat-chip>Dark Theme</mat-chip>
+                <mat-chip>Real-time Updates</mat-chip>
+                <mat-chip>Activity Tracking</mat-chip>
+              </mat-chip-set>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Acknowledgments Card -->
+  <mat-card class="acknowledgments-card">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>favorite</mat-icon>
+      </div>
+      <mat-card-title>Acknowledgments</mat-card-title>
+      <mat-card-subtitle>Special thanks</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <p>
+        This project was created with the help of modern development tools and frameworks. 
+        Special appreciation for the open-source community and the developers behind Angular, 
+        Material Design, Node.js, and MongoDB for making such powerful tools available.
+      </p>
+      <p>
+        Built with dedication to serve the tennis community and demonstrate modern web development practices.
+      </p>
+    </mat-card-content>
+  </mat-card>
+</div>

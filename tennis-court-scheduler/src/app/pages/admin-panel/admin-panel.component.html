@@ -1,0 +1,147 @@
+<div class="admin-panel-container">
+  <div class="header">
+    <h1>
+      <mat-icon>admin_panel_settings</mat-icon>
+      Admin Panel - Coin Management
+    </h1>
+    <p>Manage VGTennisMorningClub coin balance</p>
+  </div>
+
+  <!-- Club Balance Overview -->
+  <mat-card class="balance-card">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>account_balance</mat-icon>
+      </div>
+      <mat-card-title>Club Balance</mat-card-title>
+      <mat-card-subtitle>VGTennisMorningClub</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="balance-display" *ngIf="clubBalance">
+        <div class="balance-number">
+          <mat-icon>toll</mat-icon>
+          <span class="balance-value">{{ clubBalance.balance | number }}</span>
+        </div>
+        
+        <div class="balance-stats">
+          <div class="stat">
+            <span class="label">Total Purchased:</span>
+            <span class="value">{{ clubBalance.totalPurchased | number }}</span>
+          </div>
+          <div class="stat">
+            <span class="label">Total Used:</span>
+            <span class="value">{{ clubBalance.totalUsed | number }}</span>
+          </div>
+          <div class="stat">
+            <span class="label">Last Updated:</span>
+            <span class="value">{{ clubBalance.lastUpdated | date:'medium' }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="!clubBalance" class="no-balance">
+        <mat-icon>info</mat-icon>
+        <span>Club balance not available</span>
+      </div>
+    </mat-card-content>
+    
+    <mat-card-actions>
+      <button mat-button (click)="refreshBalance()">
+        <mat-icon>refresh</mat-icon>
+        Refresh
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Add Coins Section -->
+  <mat-card class="add-coins-card">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>add_circle</mat-icon>
+      </div>
+      <mat-card-title>Add Coins to Club</mat-card-title>
+      <mat-card-subtitle>Increase the shared club balance</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <!-- Quick Amount Buttons -->
+      <div class="quick-amounts">
+        <h3>Quick Amounts</h3>
+        <div class="amount-buttons">
+          <button 
+            mat-stroked-button 
+            *ngFor="let amount of quickAmounts"
+            [class.selected]="coinsToAdd === amount"
+            (click)="setQuickAmount(amount)"
+          >
+            {{ amount }}
+          </button>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Custom Amount Form -->
+      <div class="custom-form">
+        <mat-form-field appearance="outline" class="amount-field">
+          <mat-label>Coins to Add</mat-label>
+          <input 
+            matInput 
+            type="number" 
+            [(ngModel)]="coinsToAdd" 
+            min="1" 
+            max="10000"
+            placeholder="Enter amount"
+          >
+          <mat-icon matSuffix>toll</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="description-field">
+          <mat-label>Description (Optional)</mat-label>
+          <input 
+            matInput 
+            [(ngModel)]="description" 
+            placeholder="e.g., Weekly club refill"
+            maxlength="100"
+          >
+          <mat-icon matSuffix>description</mat-icon>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+    
+    <mat-card-actions>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="addCoinsToClub()"
+        [disabled]="isLoading || !coinsToAdd || coinsToAdd <= 0"
+      >
+        <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+        <mat-icon *ngIf="!isLoading">add</mat-icon>
+        <span *ngIf="!isLoading">Add {{ coinsToAdd || 0 }} Coins</span>
+        <span *ngIf="isLoading">Adding Coins...</span>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Information Card -->
+  <mat-card class="info-card">
+    <mat-card-header>
+      <div mat-card-avatar>
+        <mat-icon>info</mat-icon>
+      </div>
+      <mat-card-title>How It Works</mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <ul>
+        <li>All non-admin users share the VGTennisMorningClub balance</li>
+        <li>Only RoelSundiam can add coins to the club balance</li>
+        <li>Added coins are immediately available to all club members</li>
+        <li>All transactions are logged for auditing purposes</li>
+        <li>RoelSundiam has unlimited personal access to all features</li>
+      </ul>
+    </mat-card-content>
+  </mat-card>
+</div>

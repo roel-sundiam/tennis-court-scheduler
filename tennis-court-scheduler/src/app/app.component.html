@@ -14,7 +14,7 @@
 
         <!-- Logo and title -->
         <div class="logo-section" routerLink="/" style="cursor: pointer;">
-          <mat-icon class="logo-icon">sports_tennis</mat-icon>
+          <img src="assets/botsundi.png" alt="Tennis Court Scheduler Logo" class="logo-image">
           <span class="app-title">Tennis Court Scheduler</span>
         </div>
 
@@ -24,7 +24,7 @@
         <!-- Desktop Navigation -->
         <nav class="desktop-nav">
           <ng-container *ngFor="let item of navItems">
-            <a *ngIf="!item.adminOnly || (item.adminOnly && auth.isAdmin())"
+            <a *ngIf="isNavItemVisible(item)"
                mat-button
                [routerLink]="item.route"
                routerLinkActive="active-link"
@@ -34,6 +34,9 @@
             </a>
           </ng-container>
         </nav>
+
+        <!-- Coin Balance -->
+        <app-coin-balance></app-coin-balance>
 
         <!-- User Actions -->
         <div class="user-actions">
@@ -74,5 +77,8 @@
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>
+    
+    <!-- Footer -->
+    <app-footer></app-footer>
   </mat-sidenav-content>
 </mat-sidenav-container>
