@@ -1,0 +1,319 @@
+<div class="container">
+  <div class="page-header">
+    <h1>Activity Logs</h1>
+    <p>Monitor user activity and page access</p>
+  </div>
+
+  <!-- Coin Status -->
+  <div class="coin-status" *ngIf="hasAccessToPage">
+    <mat-card class="coin-info">
+      <div class="balance-display">
+        <mat-icon class="coin-icon">monetization_on</mat-icon>
+        <span>Balance: {{ coinBalance }}</span>
+      </div>
+      <div class="feature-costs">
+        <span class="cost-item">
+          <mat-icon>filter_list</mat-icon>
+          Filters: {{ featureCosts.FILTER }} coins
+        </span>
+        <span class="cost-item">
+          <mat-icon>analytics</mat-icon>
+          Stats: {{ featureCosts.STATS }} coins
+        </span>
+        <span class="cost-item">
+          <mat-icon>download</mat-icon>
+          Export: {{ featureCosts.EXPORT }} coins
+        </span>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Access Denied Message -->
+  <div class="access-denied" *ngIf="!hasAccessToPage && !loading">
+    <mat-card class="warning-card">
+      <mat-card-header>
+        <mat-icon>lock</mat-icon>
+        <mat-card-title>Premium Feature</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Activity Logs is a premium feature that requires {{ featureCosts.VIEW }} coins to access.</p>
+        <p>Current balance: {{ coinBalance }} coins</p>
+        <button mat-raised-button color="primary" (click)="checkPageAccess()" [disabled]="!canAffordFeature('ACTIVITY_LOGS_VIEW')">
+          <mat-icon>monetization_on</mat-icon>
+          Purchase Access ({{ featureCosts.VIEW }} coins)
+        </button>
+        <button mat-button (click)="openPurchaseModal()" *ngIf="!canAffordFeature('ACTIVITY_LOGS_VIEW')">
+          <mat-icon>add_shopping_cart</mat-icon>
+          Buy More Coins
+        </button>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- View Toggle -->
+  <div class="view-toggle" *ngIf="hasAccessToPage">
+    <mat-button-toggle-group [(ngModel)]="viewMode" (change)="switchView(viewMode)">
+      <mat-button-toggle value="logs">
+        <mat-icon>list</mat-icon>
+        Activity Logs
+      </mat-button-toggle>
+      <mat-button-toggle value="stats" [disabled]="!canAffordFeature('ACTIVITY_STATS_VIEW')">
+        <mat-icon>analytics</mat-icon>
+        Statistics
+        <span class="coin-cost" *ngIf="!canAffordFeature('ACTIVITY_STATS_VIEW')">
+          ({{ featureCosts.STATS }} 🪙)
+        </span>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  <!-- Statistics View -->
+  <div *ngIf="viewMode === 'stats'" class="stats-view">
+    <div class="stats-grid" *ngIf="stats">
+      <!-- Total Logs -->
+      <mat-card class="stat-card">
+        <mat-card-header>
+          <mat-icon>assessment</mat-icon>
+          <mat-card-title>Total Activity</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="stat-number">{{ stats.totalLogs }}</div>
+          <div class="stat-label">Total Logs</div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Top Users -->
+      <mat-card class="stat-card">
+        <mat-card-header>
+          <mat-icon>people</mat-icon>
+          <mat-card-title>Top Users</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="user-list">
+            <div *ngFor="let user of stats.topUsers.slice(0, 5)" class="user-item">
+              <span class="user-name">{{ user._id.userId }}</span>
+              <span class="user-role" [style.color]="getRoleColor(user._id.userRole)">
+                {{ user._id.userRole }}
+              </span>
+              <span class="user-count">{{ user.count }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Action Breakdown -->
+      <mat-card class="stat-card">
+        <mat-card-header>
+          <mat-icon>speed</mat-icon>
+          <mat-card-title>Actions</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="action-list">
+            <div *ngFor="let action of stats.actionBreakdown" class="action-item">
+              <mat-icon>{{ getActionIcon(action._id) }}</mat-icon>
+              <span class="action-name">{{ action._id }}</span>
+              <span class="action-count">{{ action.count }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Top Pages -->
+      <mat-card class="stat-card">
+        <mat-card-header>
+          <mat-icon>web</mat-icon>
+          <mat-card-title>Popular Pages</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="page-list">
+            <div *ngFor="let page of stats.topPages.slice(0, 5)" class="page-item">
+              <span class="page-name">{{ page._id }}</span>
+              <span class="page-count">{{ page.count }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Logs View -->
+  <div *ngIf="viewMode === 'logs'" class="logs-view">
+    <!-- Filters -->
+    <mat-card class="filters-card">
+      <mat-card-header>
+        <mat-icon>filter_list</mat-icon>
+        <mat-card-title>Filters</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="filters-grid">
+          <mat-form-field>
+            <mat-label>User</mat-label>
+            <input matInput [(ngModel)]="selectedUser" placeholder="Username">
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>User Role</mat-label>
+            <mat-select [(ngModel)]="selectedUserRole">
+              <mat-option value="">All Roles</mat-option>
+              <mat-option *ngFor="let role of userRoles" [value]="role">
+                {{ role | titlecase }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Action</mat-label>
+            <mat-select [(ngModel)]="selectedAction">
+              <mat-option value="">All Actions</mat-option>
+              <mat-option *ngFor="let action of actions" [value]="action">
+                {{ action }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Page</mat-label>
+            <input matInput [(ngModel)]="selectedPage" placeholder="Page URL">
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Start Date</mat-label>
+            <input matInput type="date" [(ngModel)]="startDate">
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>End Date</mat-label>
+            <input matInput type="date" [(ngModel)]="endDate">
+          </mat-form-field>
+        </div>
+
+        <div class="filter-actions">
+          <button mat-raised-button 
+                  color="primary" 
+                  (click)="applyFilters()"
+                  [disabled]="!canAffordFeature('ACTIVITY_LOGS_FILTER')"
+                  matTooltip="Filter logs ({{ featureCosts.FILTER }} coins)">
+            <mat-icon>search</mat-icon>
+            Apply Filters
+            <span class="coin-cost-badge" *ngIf="!canAffordFeature('ACTIVITY_LOGS_FILTER')">
+              {{ featureCosts.FILTER }} 🪙
+            </span>
+          </button>
+          <button mat-button (click)="clearFilters()">
+            <mat-icon>clear</mat-icon>
+            Clear
+          </button>
+          <button mat-raised-button 
+                  color="accent" 
+                  (click)="exportData()"
+                  [disabled]="!canAffordFeature('ACTIVITY_LOGS_EXPORT')"
+                  matTooltip="Export activity data ({{ featureCosts.EXPORT }} coins)">
+            <mat-icon>download</mat-icon>
+            Export Data
+            <span class="coin-cost-badge" *ngIf="!canAffordFeature('ACTIVITY_LOGS_EXPORT')">
+              {{ featureCosts.EXPORT }} 🪙
+            </span>
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Activity Logs Table -->
+    <mat-card class="logs-card">
+      <mat-card-header>
+        <mat-icon>history</mat-icon>
+        <mat-card-title>Activity Log Entries</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="loading" class="loading">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading activity logs...</p>
+        </div>
+
+        <div *ngIf="error" class="error">
+          <mat-icon>error</mat-icon>
+          <span>{{ error }}</span>
+        </div>
+
+        <div *ngIf="!loading && !error" class="logs-table-container">
+          <table mat-table [dataSource]="activityLogs" class="logs-table">
+            <!-- Timestamp Column -->
+            <ng-container matColumnDef="timestamp">
+              <th mat-header-cell *matHeaderCellDef>Time</th>
+              <td mat-cell *matCellDef="let log">
+                <div class="timestamp">{{ formatDate(log.timestamp) }}</div>
+              </td>
+            </ng-container>
+
+            <!-- User Column -->
+            <ng-container matColumnDef="user">
+              <th mat-header-cell *matHeaderCellDef>User</th>
+              <td mat-cell *matCellDef="let log">
+                <div class="user-info">
+                  <span class="username">{{ log.username }}</span>
+                  <span class="user-role-badge" [style.background-color]="getRoleColor(log.userRole)">
+                    {{ log.userRole }}
+                  </span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Action Column -->
+            <ng-container matColumnDef="action">
+              <th mat-header-cell *matHeaderCellDef>Action</th>
+              <td mat-cell *matCellDef="let log">
+                <div class="action-info">
+                  <mat-icon>{{ getActionIcon(log.action) }}</mat-icon>
+                  <span>{{ log.action }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Page Column -->
+            <ng-container matColumnDef="page">
+              <th mat-header-cell *matHeaderCellDef>Page</th>
+              <td mat-cell *matCellDef="let log">
+                <code class="page-url">{{ log.page }}</code>
+              </td>
+            </ng-container>
+
+            <!-- Session Column -->
+            <ng-container matColumnDef="session">
+              <th mat-header-cell *matHeaderCellDef>Session</th>
+              <td mat-cell *matCellDef="let log">
+                <span class="session-id">{{ log.sessionId.substring(0, 8) }}...</span>
+              </td>
+            </ng-container>
+
+            <!-- Additional Data Column -->
+            <ng-container matColumnDef="data">
+              <th mat-header-cell *matHeaderCellDef>Details</th>
+              <td mat-cell *matCellDef="let log">
+                <div *ngIf="log.additionalData" class="additional-data">
+                  <mat-icon matTooltip="Additional data available">info</mat-icon>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['timestamp', 'user', 'action', 'page', 'session', 'data']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['timestamp', 'user', 'action', 'page', 'session', 'data']"></tr>
+          </table>
+
+          <!-- No Data Message -->
+          <div *ngIf="activityLogs.length === 0" class="no-data">
+            <mat-icon>inbox</mat-icon>
+            <p>No activity logs found</p>
+          </div>
+
+          <!-- Load More Button -->
+          <div *ngIf="hasMore" class="load-more">
+            <button mat-raised-button (click)="loadMore()" [disabled]="loading">
+              <mat-icon>expand_more</mat-icon>
+              Load More
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
