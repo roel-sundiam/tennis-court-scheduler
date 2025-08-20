@@ -133,6 +133,12 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.18);
 }
 
+.calendar-grid.mwf-grid {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
 .day-header {
   background: #4e54c8;
   color: #fff;
@@ -454,6 +460,10 @@ mat-card-content {
   
   .calendar-grid {
     gap: 0.5px;
+  }
+  
+  .calendar-grid.mwf-grid {
+    max-width: 100%;
   }
   
   .calendar-day {

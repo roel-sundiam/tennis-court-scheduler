@@ -135,6 +135,35 @@ export class TeamsMatchesComponent implements OnInit {
     this.loadGeneratedTeams();
   }
 
+  // Check for auto-generation after data is loaded
+  private checkForAutoGeneration() {
+    if (!this.poll || !this.players.length) {
+      console.log('🤖 Auto-generation skipped: missing poll or players');
+      return;
+    }
+
+    console.log('🤖 Teams-matches: Checking auto-generation for all dates...');
+    
+    // Check each date option for auto-generation opportunity
+    this.poll.options.forEach(dateOption => {
+      const players = this.getPlayersForDate(dateOption.id);
+      const existingTeams = this.getGeneratedTeamsForDate(dateOption.id);
+      
+      console.log(`🤖 Date ${dateOption.id}: ${players.length} players, existing teams:`, existingTeams);
+      console.log(`🔍 Players for ${dateOption.id}:`, players.map(p => p.name));
+      
+      // Auto-generate if 4+ players and no existing teams
+      const needsGeneration = players.length >= 4 && !existingTeams;
+      
+      if (needsGeneration) {
+        console.log(`🤖 Auto-generating teams for ${dateOption.id} with ${players.length} players`);
+        this.autoGenerateTeamsForDate(dateOption.id, players);
+      } else {
+        console.log(`🤖 Skipping auto-generation for ${dateOption.id}: ${players.length} players, has teams: ${!!existingTeams}`);
+      }
+    });
+  }
+
   loadPoll() {
     this.pollService.getPollById('1').subscribe({
       next: (poll) => {
@@ -188,6 +217,11 @@ export class TeamsMatchesComponent implements OnInit {
         if (this.generatedTeams.length === 0) {
           console.log('✅ No generated teams found - database has been cleared!');
         }
+        
+        // Check for auto-generation after loading existing teams and when poll/players are available
+        setTimeout(() => {
+          this.checkForAutoGeneration();
+        }, 100);
       },
       error: (error) => {
         console.error('❌ Failed to load generated teams:', error);
@@ -279,6 +313,118 @@ export class TeamsMatchesComponent implements OnInit {
       panelClass: ['warning-snackbar']
     }).onAction().subscribe(() => {
       this.openPurchaseModal();
+    });
+  }
+
+  // Auto-generation methods
+  private autoGenerateTeamsForDate(dateId: string, players: Player[]) {
+    console.log(`🤖 Teams-matches: Auto-generating teams for ${dateId} with ${players.length} players`);
+    
+    // For auto-generation, create matches directly from all players
+    const matches = this.createMatchesFromAllPlayers(players);
+    
+    // Create dummy teams for structure (not actually used in display)
+    const teams: Team[] = [];
+    const reservePlayers: Player[] = []; // Always empty
+
+    const generatedTeamsData = {
+      dateId,
+      algorithm: 'random',
+      teams,
+      matches,
+      reservePlayers
+    };
+
+    // Save to backend
+    this.saveTeamsToBackend(generatedTeamsData);
+    console.log(`✅ Teams-matches: Auto-generated teams for ${dateId} with all ${players.length} players`);
+  }
+
+  // Create matches directly from all players (for auto-generation)
+  private createMatchesFromAllPlayers(allPlayers: Player[]): Match[] {
+    const matches: Match[] = [];
+    
+    if (allPlayers.length < 4) {
+      return matches;
+    }
+
+    console.log(`🎯 Teams-matches: Creating matches from ${allPlayers.length} players:`, allPlayers.map(p => p.name));
+
+    // Create 4 matches ensuring all players participate
+    const playerPool = [...allPlayers];
+    const playerUsageCount = new Map<string, number>();
+    
+    // Initialize usage count
+    allPlayers.forEach(player => {
+      playerUsageCount.set(player.id, 0);
+    });
+
+    for (let matchNum = 1; matchNum <= 4; matchNum++) {
+      // Sort players by usage count (least used first) then shuffle among tied players
+      const availablePlayers = playerPool
+        .sort((a, b) => {
+          const usageA = playerUsageCount.get(a.id) || 0;
+          const usageB = playerUsageCount.get(b.id) || 0;
+          if (usageA !== usageB) {
+            return usageA - usageB; // Least used first
+          }
+          return Math.random() - 0.5; // Random among tied players
+        });
+
+      // Take first 4 available players
+      if (availablePlayers.length >= 4) {
+        const selectedPlayers = availablePlayers.slice(0, 4);
+        
+        // Create teams from selected players
+        const teamA = this.createTeam(selectedPlayers[0], selectedPlayers[1], 1);
+        const teamB = this.createTeam(selectedPlayers[2], selectedPlayers[3], 2);
+        
+        // Update usage count
+        selectedPlayers.forEach(player => {
+          const currentCount = playerUsageCount.get(player.id) || 0;
+          playerUsageCount.set(player.id, currentCount + 1);
+        });
+        
+        matches.push({
+          id: `match-${matchNum}`,
+          teamA,
+          teamB
+        });
+        
+        console.log(`✅ Teams-matches: Match ${matchNum}: ${selectedPlayers.map(p => p.name).join(', ')}`);
+      }
+    }
+
+    console.log('🎯 Teams-matches: Final player usage counts:');
+    playerUsageCount.forEach((count, playerId) => {
+      const player = allPlayers.find(p => p.id === playerId);
+      console.log(`  ${player?.name}: ${count} matches`);
+    });
+
+    return matches;
+  }
+
+  private createTeam(player1: Player, player2: Player, teamNumber: number): Team {
+    return {
+      id: `team-${teamNumber}`,
+      player1,
+      player2,
+      averageSeed: (player1.seed + player2.seed) / 2
+    };
+  }
+
+  // Save generated teams to backend
+  private saveTeamsToBackend(generatedTeamsData: any) {
+    console.log('Teams-matches: Attempting to save teams to backend:', generatedTeamsData);
+    this.pollService.saveGeneratedTeams('1', generatedTeamsData).subscribe({
+      next: (response) => {
+        console.log('✅ Teams-matches: Teams successfully saved to backend:', response);
+        // Reload teams to show the new data
+        this.loadGeneratedTeams();
+      },
+      error: (error) => {
+        console.error('❌ Teams-matches: Failed to save teams to backend:', error);
+      }
     });
   }
 

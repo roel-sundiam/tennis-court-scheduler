@@ -9,7 +9,45 @@ export class DateUtilsService {
   constructor() { }
 
   /**
+   * Generate poll options for the next Monday/Wednesday/Friday dates (date only, no time slots)
+   */
+  generateMWFOptions(): PollOption[] {
+    const options: PollOption[] = [];
+    const today = new Date();
+    let currentDate = new Date(today);
+    
+    // Start from today (include today if it's MWF)
+    const todayDayOfWeek = today.getDay();
+    if (todayDayOfWeek !== 1 && todayDayOfWeek !== 3 && todayDayOfWeek !== 5) {
+      // If today is not MWF, start from tomorrow
+      currentDate.setDate(today.getDate() + 1);
+    }
+    
+    // Generate options for the next 9 MWF dates (about 3 weeks)
+    while (options.length < 9) {
+      const dayOfWeek = currentDate.getDay();
+      
+      // Check if it's Monday (1), Wednesday (3), or Friday (5)
+      if (dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5) {
+        const dateString = this.formatDate(currentDate);
+        
+        options.push({
+          id: dateString,
+          date: dateString,
+          time: '' // No specific time, just the date
+        });
+      }
+      
+      // Move to next day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return options;
+  }
+
+  /**
    * Generate poll options for the next 7 days starting from tomorrow (date only, no time slots)
+   * @deprecated Use generateMWFOptions() instead for MWF-only scheduling
    */
   generateWeeklyOptions(): PollOption[] {
     const options: PollOption[] = [];

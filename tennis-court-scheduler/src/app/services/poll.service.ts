@@ -25,7 +25,7 @@ export class PollService {
   createPoll(poll: Partial<Poll>): Observable<Poll> {
     // Ensure options are generated if not provided
     if (!poll.options || poll.options.length === 0) {
-      poll.options = this.dateUtils.generateWeeklyOptions().map((opt, index) => ({
+      poll.options = this.dateUtils.generateMWFOptions().map((opt, index) => ({
         id: `${index + 1}`,
         date: opt.date,
         time: '18:00',

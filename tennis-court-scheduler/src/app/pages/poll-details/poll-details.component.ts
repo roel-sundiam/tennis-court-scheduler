@@ -82,8 +82,9 @@ export class PollDetailsComponent implements OnInit {
     );
   }
 
-  private _filterPlayers(value: string): Player[] {
-    const filterValue = value.toLowerCase();
+  private _filterPlayers(value: string | Player): Player[] {
+    // Handle both string and Player object inputs
+    const filterValue = typeof value === 'string' ? value.toLowerCase() : (value?.name || '').toLowerCase();
     const sortedPlayers = this.getSortedPlayersByName();
     
     return sortedPlayers.filter(player => 
@@ -343,12 +344,12 @@ export class PollDetailsComponent implements OnInit {
 
   onPlayerSelected(player: Player) {
     this.selectedPlayerId = player.id;
-    this.playerControl.setValue(player.name);
+    this.playerControl.setValue(player);
     this.onPlayerSelectionChange();
   }
 
-  displayPlayerName(player: Player): string {
-    return player ? player.name : '';
+  displayPlayerName(player: Player | null): string {
+    return player?.name || '';
   }
 
   openAlertDialog(title: string, message: string): void {

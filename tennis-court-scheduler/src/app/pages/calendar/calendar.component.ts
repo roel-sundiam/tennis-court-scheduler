@@ -138,7 +138,7 @@ export class CalendarComponent implements OnInit {
   }
 
   getMonthYearString(): string {
-    return this.currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+    return `MWF Schedule - ${this.currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}`;
   }
 
   getMatchStatusColor(status: string): string {
@@ -169,17 +169,42 @@ export class CalendarComponent implements OnInit {
     
     this.calendarDays = [];
     
-    // Add empty days for the start of the month
-    for (let i = 0; i < firstDay.getDay(); i++) {
-      this.calendarDays.push({ date: null });
+    // Find first Monday/Wednesday/Friday of the month
+    let currentDate = new Date(firstDay);
+    let firstMWFFound = false;
+    
+    // Add empty slots until we find the first MWF day
+    while (!firstMWFFound && currentDate <= lastDay) {
+      const dayOfWeek = currentDate.getDay();
+      if (dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5) {
+        firstMWFFound = true;
+      } else {
+        this.calendarDays.push({ date: null });
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
     }
     
-    // Add all days of the month
+    // Add only Monday/Wednesday/Friday days of the month
     for (let day = 1; day <= lastDay.getDate(); day++) {
-      this.calendarDays.push({
-        date: new Date(year, month, day),
-        matches: [] // You would populate this with actual matches
-      });
+      const date = new Date(year, month, day);
+      const dayOfWeek = date.getDay();
+      
+      // Only include Monday (1), Wednesday (3), or Friday (5)
+      if (dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5) {
+        this.calendarDays.push({
+          date: date,
+          matches: [], // You would populate this with actual matches
+          dayNumber: day,
+          isCurrentMonth: true,
+          isToday: this.isToday(date),
+          isPast: date < new Date()
+        });
+      }
     }
+  }
+
+  private isToday(date: Date): boolean {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
   }
 } 
