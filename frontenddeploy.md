@@ -26,7 +26,7 @@ This guide provides step-by-step instructions for deploying the Tennis Court Sch
    ```
 
 4. **Verify build output**:
-   - Check that `dist/tennis-court-scheduler` folder exists
+   - Check that `dist/tennis-court-scheduler/browser` folder exists
    - Should contain files: `index.html`, `main-*.js`, `polyfills-*.js`, `styles-*.css`, `favicon.ico`
 
 ## Step 2: Prepare for Deployment
@@ -36,7 +36,7 @@ This guide provides step-by-step instructions for deploying the Tennis Court Sch
    - Should point to: `https://tennis-backend-rd31.onrender.com`
 
 2. **Build output location**:
-   - **Deploy folder**: `dist/tennis-court-scheduler`
+   - **Deploy folder**: `dist/tennis-court-scheduler/browser`
    - This folder contains all files needed for deployment
 
 ## Step 3: Deploy to Netlify
@@ -52,15 +52,41 @@ This guide provides step-by-step instructions for deploying the Tennis Court Sch
    - You'll see a drag-and-drop area
 
 3. **Deploy the build**:
-   - Drag and drop the entire `dist/tennis-court-scheduler` folder to the deployment area
-   - **Important**: Drop the `tennis-court-scheduler` folder itself, not its contents
+   - Drag and drop the entire `dist/tennis-court-scheduler/browser` folder to the deployment area
+   - **Important**: Drop the `browser` folder itself, not its contents
    - Wait for deployment to complete (usually 1-2 minutes)
 
 4. **Get your site URL**:
    - Netlify will provide a URL like: `https://random-name-123456.netlify.app`
    - Save this URL for testing
 
-### Option B: Git-based Deployment (For future updates)
+### Option B: Netlify CLI Deployment
+
+1. **Install Netlify CLI** (if not already installed):
+   ```powershell
+   npm install -g netlify-cli
+   ```
+
+2. **Login to Netlify**:
+   ```powershell
+   netlify login
+   ```
+
+3. **Deploy from the Angular project directory**:
+   ```powershell
+   cd C:\Projects2\CourtScheduling\tennis-court-scheduler
+   netlify deploy --prod
+   ```
+
+4. **Link to existing site** (if prompted):
+   - Choose: "Link this directory to an existing site"
+   - Select: "Search by full or partial site name"
+   - Enter your site name: `silly-llama-a2ab6f` (or your site name)
+
+5. **Set publish directory**:
+   - When prompted for publish directory, enter: `dist/tennis-court-scheduler/browser`
+
+### Option C: Git-based Deployment (For future updates)
 
 1. **Connect repository**:
    - Click "Add new site" → "Import from Git"
@@ -69,7 +95,7 @@ This guide provides step-by-step instructions for deploying the Tennis Court Sch
 
 2. **Configure build settings**:
    - **Build command**: `npm run build`
-   - **Publish directory**: `dist/tennis-court-scheduler`
+   - **Publish directory**: `dist/tennis-court-scheduler/browser`
    - **Base directory**: `tennis-court-scheduler`
 
 ## Step 4: Configure Custom Domain (Optional)
@@ -177,7 +203,7 @@ If using Git-based deployment:
 ### Manual Updates
 
 1. Run `npm run build` locally
-2. Drag and drop new `dist/tennis-court-scheduler` folder to Netlify
+2. Drag and drop new `dist/tennis-court-scheduler/browser` folder to Netlify
 3. Old deployment is automatically replaced
 
 ## Performance Optimization

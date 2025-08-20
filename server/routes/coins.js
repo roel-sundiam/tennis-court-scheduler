@@ -28,7 +28,7 @@ const authenticateAdmin = (req, res, next) => {
 
 // Club Balance Schema (shared pool for all non-RoelSundiam users)
 const clubBalanceSchema = new mongoose.Schema({
-  clubId: { type: String, required: true, unique: true, default: 'VGTennisMorningClub' },
+  clubId: { type: String, required: true, default: 'VGTennisMorningClub' },
   balance: { type: Number, default: 500, min: 0 },
   totalPurchased: { type: Number, default: 500 },
   totalUsed: { type: Number, default: 0 },
@@ -37,7 +37,7 @@ const clubBalanceSchema = new mongoose.Schema({
 
 // Individual User Balance Schema (only for RoelSundiam - unlimited)
 const userBalanceSchema = new mongoose.Schema({
-  userId: { type: String, required: true, unique: true },
+  userId: { type: String, required: true },
   username: { type: String, required: true },
   balance: { type: Number, default: -1 }, // -1 = unlimited for RoelSundiam
   totalPurchased: { type: Number, default: 0 },
@@ -62,8 +62,8 @@ const coinTransactionSchema = new mongoose.Schema({
 });
 
 // Add indexes for better performance
-clubBalanceSchema.index({ clubId: 1 });
-userBalanceSchema.index({ userId: 1 });
+clubBalanceSchema.index({ clubId: 1 }, { unique: true });
+userBalanceSchema.index({ userId: 1 }, { unique: true });
 coinTransactionSchema.index({ userId: 1, timestamp: -1 });
 coinTransactionSchema.index({ clubId: 1, timestamp: -1 });
 coinTransactionSchema.index({ type: 1 });

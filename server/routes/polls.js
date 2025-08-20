@@ -2,23 +2,37 @@ const express = require('express');
 const router = express.Router();
 const Poll = require('../models/poll');
 
-// Helper function to generate rolling 7-day options starting from tomorrow
-function generateRollingWeeklyOptions() {
+// Helper function to generate rolling MWF (Monday/Wednesday/Friday) options starting from today if MWF
+function generateRollingMWFOptions() {
   const options = [];
   const today = new Date();
+  let currentDate = new Date(today);
   
-  for (let i = 1; i <= 7; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
+  // Start from today (include today if it's MWF)
+  const todayDayOfWeek = today.getDay();
+  if (todayDayOfWeek !== 1 && todayDayOfWeek !== 3 && todayDayOfWeek !== 5) {
+    // If today is not MWF, start from tomorrow
+    currentDate.setDate(today.getDate() + 1);
+  }
+  
+  // Generate options for the next 9 MWF dates (about 3 weeks)
+  while (options.length < 9) {
+    const dayOfWeek = currentDate.getDay();
     
-    const dateString = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+    // Check if it's Monday (1), Wednesday (3), or Friday (5)
+    if (dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5) {
+      const dateString = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+      
+      options.push({
+        id: dateString,
+        date: dateString,
+        time: '', // No time
+        maxPlayers: 8 // Default to 8 players (2 doubles matches)
+      });
+    }
     
-    options.push({
-      id: dateString,
-      date: dateString,
-      time: '', // No time
-      maxPlayers: 8 // Default to 8 players (2 doubles matches)
-    });
+    // Move to next day
+    currentDate.setDate(currentDate.getDate() + 1);
   }
   
   return options;
@@ -30,7 +44,7 @@ router.get('/', async (req, res) => {
     const polls = await Poll.find();
     
     // Auto-refresh dates for all polls
-    const currentRollingOptions = generateRollingWeeklyOptions();
+    const currentRollingOptions = generateRollingMWFOptions();
     let updatedAny = false;
     
     for (const poll of polls) {
@@ -39,7 +53,7 @@ router.get('/', async (req, res) => {
                          poll.options[0].date !== currentRollingOptions[0].date;
       
       if (needsUpdate) {
-        console.log(`Updating poll ${poll.id} with rolling dates: ${currentRollingOptions[0].date} to ${currentRollingOptions[6].date}`);
+        console.log(`Updating poll ${poll.id} with rolling MWF dates: ${currentRollingOptions[0].date} to ${currentRollingOptions[currentRollingOptions.length-1].date}`);
         poll.options = currentRollingOptions;
         await poll.save();
         updatedAny = true;
@@ -64,8 +78,8 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Poll not found' });
     }
 
-    // Auto-refresh poll options to current rolling 7-day window
-    const currentRollingOptions = generateRollingWeeklyOptions();
+    // Auto-refresh poll options to current rolling MWF window
+    const currentRollingOptions = generateRollingMWFOptions();
     
     // Check if the poll dates need updating (compare first date)
     const needsUpdate = !poll.options || 
@@ -86,7 +100,7 @@ router.get('/:id', async (req, res) => {
     }
     
     if (shouldUpdate) {
-      console.log(`Updating poll ${poll.id} with rolling dates: ${currentRollingOptions[0].date} to ${currentRollingOptions[6].date}`);
+      console.log(`Updating poll ${poll.id} with rolling MWF dates: ${currentRollingOptions[0].date} to ${currentRollingOptions[currentRollingOptions.length-1].date}`);
       
       // Create mapping of old dates to new dates to preserve votes
       const oldDates = poll.options.map(opt => opt.date);
@@ -95,7 +109,7 @@ router.get('/:id', async (req, res) => {
       console.log('Old dates:', oldDates);
       console.log('New dates:', newDates);
       
-      // Update votes to map old dates to new dates where possible
+      // Update votes to map old dates to new MWF dates where possible
       // For simplicity, we'll keep overlapping dates and remove votes for dates no longer available
       poll.votes = poll.votes.map(vote => {
         const updatedOptionIds = vote.optionIds.filter(optionId => 
@@ -108,7 +122,7 @@ router.get('/:id', async (req, res) => {
         };
       }).filter(vote => vote.optionIds.length > 0); // Remove votes that have no valid dates left
       
-      // Update poll options with new rolling dates
+      // Update poll options with new rolling MWF dates
       poll.options = currentRollingOptions;
       
       // Save the updated poll
@@ -286,6 +300,103 @@ router.get('/:id/teams', async (req, res) => {
     res.json({ generatedTeams });
   } catch (error) {
     console.error('❌ Error getting teams:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Remove ALL votes from a poll
+router.delete('/:id/votes', async (req, res) => {
+  try {
+    console.log('🔵 DELETE /polls/:id/votes called with pollId:', req.params.id);
+    
+    const poll = await Poll.findOne({ id: req.params.id });
+    if (!poll) {
+      console.log('❌ Poll not found with id:', req.params.id);
+      return res.status(404).json({ message: 'Poll not found' });
+    }
+
+    const beforeVotes = poll.votes.length;
+    const beforeTotalVotes = poll.totalVotes;
+    const beforeTeams = poll.generatedTeams ? poll.generatedTeams.length : 0;
+    
+    // Clear all votes and generated teams
+    poll.votes = [];
+    poll.totalVotes = 0;
+    poll.generatedTeams = [];
+    
+    await poll.save();
+    
+    console.log(`🗑️ Cleared ALL votes: ${beforeVotes} -> 0 vote entries`);
+    console.log(`🗑️ Cleared total votes: ${beforeTotalVotes} -> 0`);
+    console.log(`🗑️ Cleared all generated teams: ${beforeTeams} -> 0 team entries`);
+    console.log('✅ All votes and teams cleared successfully for poll:', req.params.id);
+    
+    res.json({ 
+      message: 'All votes and teams cleared successfully', 
+      beforeVotes,
+      beforeTotalVotes,
+      beforeTeams
+    });
+  } catch (error) {
+    console.error('❌ Error clearing all votes:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Remove votes for a specific date
+router.delete('/:id/votes/:dateId', async (req, res) => {
+  try {
+    console.log('🔵 DELETE /polls/:id/votes/:dateId called with pollId:', req.params.id, 'dateId:', req.params.dateId);
+    
+    const poll = await Poll.findOne({ id: req.params.id });
+    if (!poll) {
+      console.log('❌ Poll not found with id:', req.params.id);
+      return res.status(404).json({ message: 'Poll not found' });
+    }
+
+    const targetDate = req.params.dateId;
+    console.log('🎯 Target date to remove votes for:', targetDate);
+    
+    const beforeVotes = poll.votes.length;
+    let removedVotesCount = 0;
+    
+    // Remove the target date from all votes and filter out empty votes
+    poll.votes = poll.votes.map(vote => {
+      const originalLength = vote.optionIds.length;
+      vote.optionIds = vote.optionIds.filter(optionId => optionId !== targetDate);
+      if (vote.optionIds.length < originalLength) {
+        removedVotesCount++;
+      }
+      return vote;
+    }).filter(vote => vote.optionIds.length > 0); // Remove votes that have no dates left
+    
+    const afterVotes = poll.votes.length;
+    
+    // Update totalVotes (recalculate based on current votes array)
+    poll.totalVotes = poll.votes.reduce((sum, vote) => sum + vote.optionIds.length, 0);
+    
+    // Also clear any generated teams for this date
+    const beforeTeams = poll.generatedTeams ? poll.generatedTeams.length : 0;
+    poll.generatedTeams = poll.generatedTeams ? poll.generatedTeams.filter(gt => gt.dateId !== targetDate) : [];
+    const afterTeams = poll.generatedTeams.length;
+    
+    await poll.save();
+    
+    console.log(`🗑️ Removed votes for ${targetDate}: ${beforeVotes} -> ${afterVotes} total votes`);
+    console.log(`🗑️ Removed generated teams for ${targetDate}: ${beforeTeams} -> ${afterTeams} team entries`);
+    console.log(`📊 Updated votes affected: ${removedVotesCount} players had their votes for ${targetDate} removed`);
+    console.log('✅ Votes and teams cleared successfully for date:', targetDate);
+    
+    res.json({ 
+      message: `Votes and teams for ${targetDate} removed successfully`, 
+      removedVotesCount,
+      beforeVotes,
+      afterVotes,
+      beforeTeams,
+      afterTeams
+    });
+  } catch (error) {
+    console.error('❌ Error removing votes for date:', error);
     res.status(500).json({ message: error.message });
   }
 });

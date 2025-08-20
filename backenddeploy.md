@@ -239,7 +239,7 @@ git status
 git add .
 
 # Commit changes with descriptive message
-git commit -m "Add activity logs endpoint for user monitoring"
+git commit -m "Add activity logs and coins routes from server directory 2"
 
 # Push to GitHub
 git push origin main
