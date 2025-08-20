@@ -84,4 +84,9 @@ export class PollService {
   clearGeneratedTeams(pollId: string): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${pollId}/teams`);
   }
+
+  // Delete a specific match
+  deleteMatch(pollId: string, dateId: string, matchId: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${pollId}/teams/${dateId}/matches/${matchId}`);
+  }
 }

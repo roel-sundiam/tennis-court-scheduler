@@ -426,6 +426,61 @@ router.delete('/:id/teams', async (req, res) => {
   }
 });
 
+// Delete a specific match from generated teams
+router.delete('/:id/teams/:dateId/matches/:matchId', async (req, res) => {
+  try {
+    console.log('🔵 DELETE /polls/:id/teams/:dateId/matches/:matchId called with pollId:', req.params.id, 'dateId:', req.params.dateId, 'matchId:', req.params.matchId);
+    
+    const poll = await Poll.findOne({ id: req.params.id });
+    if (!poll) {
+      console.log('❌ Poll not found with id:', req.params.id);
+      return res.status(404).json({ message: 'Poll not found' });
+    }
+
+    const { dateId, matchId } = req.params;
+    
+    // Find the generated teams for this date
+    const teamsIndex = poll.generatedTeams ? poll.generatedTeams.findIndex(gt => gt.dateId === dateId) : -1;
+    
+    if (teamsIndex === -1) {
+      console.log('❌ No generated teams found for date:', dateId);
+      return res.status(404).json({ message: 'No generated teams found for this date' });
+    }
+
+    const teamsData = poll.generatedTeams[teamsIndex];
+    const beforeMatchCount = teamsData.matches.length;
+    
+    // Remove the specific match
+    teamsData.matches = teamsData.matches.filter(match => match.id !== matchId);
+    const afterMatchCount = teamsData.matches.length;
+    
+    if (beforeMatchCount === afterMatchCount) {
+      console.log('❌ Match not found with id:', matchId);
+      return res.status(404).json({ message: 'Match not found' });
+    }
+    
+    // If no matches left, remove the entire teams data for this date
+    if (teamsData.matches.length === 0) {
+      poll.generatedTeams.splice(teamsIndex, 1);
+      console.log(`🗑️ Removed entire teams data for ${dateId} as no matches remain`);
+    }
+    
+    await poll.save();
+    
+    console.log(`🗑️ Deleted match ${matchId} from ${dateId}: ${beforeMatchCount} -> ${afterMatchCount} matches`);
+    console.log('✅ Match deleted successfully');
+    
+    res.json({ 
+      message: 'Match deleted successfully',
+      deletedMatchId: matchId,
+      remainingMatches: afterMatchCount
+    });
+  } catch (error) {
+    console.error('❌ Error deleting match:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Delete a poll
 router.delete('/:id', async (req, res) => {
   try {

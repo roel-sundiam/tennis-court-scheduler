@@ -15,6 +15,7 @@ import { Player } from '../../mock-data/mock-players';
 import { CoinService } from '../../services/coin.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 
 // Interfaces for generated teams data
 interface Team {
@@ -436,6 +437,30 @@ export class TeamsMatchesComponent implements OnInit {
         maxHeight: '90vh',
         data: { currentBalance: this.coinBalance }
       });
+    });
+  }
+
+  deleteMatch(dateId: string, matchId: string) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Delete Match',
+        message: `Are you sure you want to delete this match? This action cannot be undone.`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.pollService.deleteMatch('1', dateId, matchId).subscribe({
+          next: (response) => {
+            this.showSuccessMessage('Match deleted successfully');
+            this.loadGeneratedTeams();
+          },
+          error: (error) => {
+            console.error('Failed to delete match:', error);
+            this.showErrorMessage('Failed to delete match. Please try again.');
+          }
+        });
+      }
     });
   }
 }

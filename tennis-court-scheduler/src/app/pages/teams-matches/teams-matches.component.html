@@ -79,6 +79,13 @@
                 <div *ngFor="let match of teamsData!.matches" class="match-card">
                   <div class="match-header">
                     <span class="match-number">{{ match.id.split('-')[1] | number }}</span>
+                    <button mat-icon-button 
+                            color="warn" 
+                            (click)="deleteMatch(dateOption.id, match.id)"
+                            title="Delete match"
+                            class="delete-match-btn">
+                      <mat-icon>delete</mat-icon>
+                    </button>
                   </div>
                   
                   <div class="teams-vs">
